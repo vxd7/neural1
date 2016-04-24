@@ -1,6 +1,40 @@
-#ifndef NEURON_H_INCLUDED
-#define NEURON_H_INCLUDED
+#pragma once
+#include <iostream>
+#include <fstream>
+#include <cmath>
+#include <ctime>
+#include <cstdlib>
+//#include "layers.h"
+
+#define TFUNC 2 //activation function
+using namespace std;
+
+class neuron{
+public:
+	int inputsCount;
+	float *weights;
+	float output;
+
+	float nmin;
 
 
+	neuron();
+	~neuron();
 
-#endif // NEURON_H_INCLUDED
+	void initNeuron(int inputs, float beta);
+
+	void randomizeWeights(float beta);
+
+	void changeWeights(int *delta);
+
+	//Treshold function
+	float tfuncSign(float sig);
+
+	float tfuncSigmoid(float sig);
+	//Summation function
+	float summate(float *inputs, int tfunc);
+
+	void outWeights(FILE *fp);
+
+};
+
