@@ -21,7 +21,7 @@ public:
 	neuron();
 	~neuron();
 
-	void initNeuron(int inputs, float beta);
+	void initNeuron(int inputs, float beta, bool isRand);
 
 	void randomizeWeights(float beta);
 

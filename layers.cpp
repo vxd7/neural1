@@ -31,11 +31,11 @@ float layer::computeBeta()
     return (magicConst*pow( (float)numberOfNeurons, (1.0/(float)inputsCount) ));
 }
 
-void layer::constructNeurons()
+void layer::constructNeurons(bool isRand)
 {
     for(int i = 0; i < numberOfNeurons; i++)
     {
-        neurons[i].initNeuron(inputsCount, computeBeta());
+        neurons[i].initNeuron(inputsCount, computeBeta(), isRand);
 
     }
 }
@@ -69,5 +69,15 @@ bool layer::writeNeuronsToFile(const char *fname)
     fclose(fp);
     fout<<"Successfully written! Layer:" << fname<<"\n";
     return true;
+}
+
+bool layer::readNeuronsFromFile(const char *fname)
+{
+    FILE *fp;
+    if((fp = fopen(fname, "wb+")) == NULL)
+    {
+        fout<<"Cannot open file. Function readNeuronsFromFile\n";
+        return false;
+    }
 }
 

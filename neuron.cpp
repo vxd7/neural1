@@ -1,6 +1,6 @@
 #include "neuron.h"
 
-void neuron::initNeuron(int inputs, float beta){
+void neuron::initNeuron(int inputs, float beta, bool isRand){
     inputsCount  = inputs;
     weights = (float *)calloc(inputsCount + 1, sizeof(float));
     output = 0.0;
@@ -9,7 +9,8 @@ void neuron::initNeuron(int inputs, float beta){
     weights[0] = nmin;
 
 
-    randomizeWeights(beta);
+    if(isRand)
+        randomizeWeights(beta);
 }
 
 neuron::neuron()

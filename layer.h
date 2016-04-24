@@ -14,10 +14,11 @@ public:
 
     float computeBeta();
 
-    void constructNeurons();
+    void constructNeurons(bool isRand);
 
     float *computeOutput();
 
     bool writeNeuronsToFile(const char *fname);
+    bool readNeuronsFromFile(const char *fname);
 };
 
