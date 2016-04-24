@@ -75,7 +75,7 @@ float neuron::tfuncSigmoid(float sig)
     int omicron = 0.5;
     int omicron0 = 0.5;
 
-    return (1 / exp(-(sig+omicron)/omicron0));
+    return (1 /(1 + exp(-(sig+omicron)/omicron0)));
 
 }
 
