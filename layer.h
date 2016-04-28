@@ -14,11 +14,11 @@
  */
 class layer{
 public:
-    neuron *neurons; /*< The neurons in this layer */
-    int numberOfNeurons; /*< Number of neurons in this layer */
-    int inputsCount; /*< Number of neurons in previous layer, equals to the number of inputs to the current layer */
+    neuron *neurons; /**< The neurons in this layer */
+    int numberOfNeurons; /**< Number of neurons in this layer */
+    int inputsCount; /**< Number of neurons in previous layer, equals to the number of inputs to the current layer */
 
-    float *inputs, *outputs; /*< Input and output vectors */
+    float *inputs, *outputs; /**< Input and output vectors */
 
 	/**
 	 * A function for initialization of a layer. 
@@ -29,12 +29,14 @@ public:
 	 */
     void initLayer(int neuronsC, int inputsC);
 
-	/* A constructor
+	/**
+	 * A constructor
 	 * mmm
 	 */
     layer();
 
-	/* A destructor.
+	/** 
+	 * A destructor.
 	 * Frees memory, deleting the neurons in the current layer, deleting input and output vectors
 	 */
     ~layer();
