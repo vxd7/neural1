@@ -81,3 +81,4 @@ bool layer::readNeuronsFromFile(const char *fname)
     }
 }
 
+sslastikov@hse.ru

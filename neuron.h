@@ -32,7 +32,7 @@ public:
 	neuron();
 
 	/**
-	 * A destructr.
+	 * A destructor.
 	 * Frees memory used by the *weights array.
 	 */
 	~neuron();
