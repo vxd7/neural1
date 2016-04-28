@@ -4,6 +4,9 @@
 #include <cmath>
 #include <ctime>
 #include <cstdlib>
+
+#include <string>
+
 //#include "layers.h"
 
 #define TFUNC 2 //activation function
