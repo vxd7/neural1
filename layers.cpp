@@ -57,7 +57,7 @@ float* layer::computeOutput()
 bool layer::writeNeuronsToFile(const char *fname)
 {
     FILE *fp;
-    if((fp = fopen(fname, "wb+")) == NULL)
+    if((fp = fopen(fname, "rb+")) == NULL)
     {
         fout<<"Error writing weights to file. Layer:" << fname<<"\n";
         cout<<"Network is fucked!";
@@ -78,7 +78,7 @@ bool layer::writeNeuronsToFile(const char *fname)
 bool layer::readNeuronsFromFile(const char *fname)
 {
     FILE *fp;
-    if((fp = fopen(fname, "wb+")) == NULL)
+    if((fp = fopen(fname, "rb+")) == NULL)
     {
         fout<<"Cannot open file. Function readNeuronsFromFile\n";
         return false;
