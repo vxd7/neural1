@@ -7,14 +7,15 @@ public:
     int layersCount;
     int *neuronsInLayers;
 
+	int inputVectorSize;
+
     float *networkInput;
     float *networkOutput;
 
-
-
+	string *fileNames;
 
     neuralNetwork();
     ~neuralNetwork();
 
-
+	bool constructLayers();
 };

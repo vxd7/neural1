@@ -43,7 +43,7 @@ public:
 
     float computeBeta();
 
-    void constructNeurons(bool isRand);
+    void constructNeurons(bool isRand, const char *fname);
 
     float *computeOutput();
 
