@@ -6,10 +6,10 @@ void layer::initLayer(int neuronsC, int inputC)
     inputsCount = inputC;
     numberOfNeurons = neuronsC;
 
-    inputs = (float *)calloc(inputsCount, sizeof(float));
-    outputs = (float *)calloc(numberOfNeurons, sizeof(float));
+	inputs = new float[inputsCount];
+	outputs = new float[numberOfNeurons];
 
-    neurons = (neuron *)calloc(numberOfNeurons, sizeof(neuron));
+	neurons = new neuron[numberOfNeurons];
 
 }
 layer::layer()
@@ -19,9 +19,9 @@ layer::layer()
 
 layer::~layer()
 {
-    free(inputs);
-    free(outputs);
-    free(neurons);
+	delete[] inputs;
+	delete[] outputs;
+	delete[] neurons;
 }
 
 float layer::computeBeta()

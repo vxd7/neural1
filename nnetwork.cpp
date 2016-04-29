@@ -8,10 +8,10 @@ neuralNetwork()
 
 ~neuralNetwork()
 {
-	free(neuronsInLayers);
-	free(networkLayers);
+	delete[] neuronsInLayers;
+	delete[] networkLayers;
 
-	delete [] fileNames;
+	delete[] fileNames;
 }
 
 void neuralNetwork::generateNames()
@@ -30,14 +30,14 @@ bool neuralNetwork::constructLayers()
 	cout<<"Input the number of layers\n"; cin>>layersCount;
 	cout<<"Input the size of input vector\n"; cin>>inputVector;
 	
-	neuronsInLayers = (int *)calloc(layersCount, sizeof(int));
+	neuronsInLayers = new int[layersCount];
 	for(int i = 0; i < layersCount; i++)
 	{
 		cout<<"Input the number of neurons in "<<i<<"'th layer";
 		cin>>neuronsInLayers[i];
 	}
 
-	networkLayers = (layer *)calloc(layersCount, sizeof(layer));
+	networkLayers = new layer[layersCount];
 
 	networkLayers[0].initLayer(neuronsInLayers[0], inputsVectorSize);
 	networkLayers[0].constructNeurons(ISRAND, );

@@ -2,7 +2,7 @@
 
 void neuron::initNeuron(int inputs, float beta, bool isRand){
     inputsCount  = inputs;
-    weights = (float *)calloc(inputsCount + 1, sizeof(float));
+	weights = new float[inputsCount];
     output = 0.0;
 
     nmin = 1; //пороговое значение
@@ -20,7 +20,7 @@ neuron::neuron()
 }
 neuron::~neuron()
 {
-    free(weights);
+	delete[] weights;
 }
 
 void neuron::randomizeWeights(float beta)
