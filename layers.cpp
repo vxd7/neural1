@@ -30,11 +30,12 @@ float layer::computeBeta()
     return (magicConst*pow( (float)numberOfNeurons, (1.0/(float)inputsCount) ));
 }
 
-void layer::constructNeurons(bool isRand, const char *fname);
+void layer::constructNeurons(bool isRand, const char *fname)
 {
+    float beta = computeBeta();
     for(int i = 0; i < numberOfNeurons; i++)
     {
-        neurons[i].initNeuron(inputsCount, computeBeta(), isRand);
+        neurons[i].initNeuron(inputsCount, beta, isRand);
 
     }
 
@@ -44,14 +45,13 @@ void layer::constructNeurons(bool isRand, const char *fname);
 	}
 }
 
-float* layer::computeOutput()
+void layer::computeOutput()
 {
     for(int i = 0; i < numberOfNeurons; i++)
     {
         outputs[i] = neurons[i].summate(inputs, TFUNC);
     }
 
-    return outputs;
 }
 
 bool layer::writeNeuronsToFile(const char *fname)
