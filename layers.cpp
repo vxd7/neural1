@@ -1,5 +1,6 @@
 #include "layer.h"
-ofstream fout("log.txt");
+ofstream layersErrLog("log.txt");
+
 
 void layer::initLayer(int neuronsC, int inputC)
 {
@@ -30,11 +31,12 @@ float layer::computeBeta()
     return (magicConst*pow( (float)numberOfNeurons, (1.0/(float)inputsCount) ));
 }
 
-void layer::constructNeurons(bool isRand, const char *fname);
+void layer::constructNeurons(bool isRand, const char *fname)
 {
+    float beta = computeBeta();
     for(int i = 0; i < numberOfNeurons; i++)
     {
-        neurons[i].initNeuron(inputsCount, computeBeta(), isRand);
+        neurons[i].initNeuron(inputsCount, beta, isRand);
 
     }
 
@@ -44,14 +46,13 @@ void layer::constructNeurons(bool isRand, const char *fname);
 	}
 }
 
-float* layer::computeOutput()
+void layer::computeOutput()
 {
     for(int i = 0; i < numberOfNeurons; i++)
     {
         outputs[i] = neurons[i].summate(inputs, TFUNC);
     }
 
-    return outputs;
 }
 
 bool layer::writeNeuronsToFile(const char *fname)
@@ -59,7 +60,7 @@ bool layer::writeNeuronsToFile(const char *fname)
     FILE *fp;
     if((fp = fopen(fname, "rb+")) == NULL)
     {
-        fout<<"Error writing weights to file. Layer:" << fname<<"\n";
+        layersErrLog<<"Error writing weights to file. Layer:" << fname<<"\n";
         cout<<"Network is fucked!";
         return false;
     }
@@ -71,7 +72,7 @@ bool layer::writeNeuronsToFile(const char *fname)
     }
 
     fclose(fp);
-    fout<<"Successfully written! Layer:" << fname<<"\n";
+    //layersErrLog<<"Successfully written! Layer:" << fname<<"\n";
     return true;
 }
 
@@ -80,7 +81,7 @@ bool layer::readNeuronsFromFile(const char *fname)
     FILE *fp;
     if((fp = fopen(fname, "rb+")) == NULL)
     {
-        fout<<"Cannot open file. Function readNeuronsFromFile\n";
+        layersErrLog<<"Cannot open file. Function readNeuronsFromFile\n";
         return false;
     }
 
@@ -97,5 +98,6 @@ bool layer::readNeuronsFromFile(const char *fname)
 	}
 
 	fclose(fp);
+	return true;
 }
 

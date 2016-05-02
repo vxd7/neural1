@@ -1,4 +1,6 @@
 #include "neuron.h"
+ofstream neuronErrLog("log.txt");
+
 
 void neuron::initNeuron(int inputs, float beta, bool isRand){
     inputsCount  = inputs;
@@ -9,8 +11,9 @@ void neuron::initNeuron(int inputs, float beta, bool isRand){
     weights[0] = nmin;
 
 
-    if(isRand)
+    if(isRand){
         randomizeWeights(beta);
+    }
 }
 
 neuron::neuron()
@@ -32,7 +35,7 @@ void neuron::randomizeWeights(float beta)
         weights[i] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX * 1 - 0.5);
     }
 
-    float norm;
+    /*float norm;
     float squareSum = 0;
 
     for(int j = 0; j < inputsCount; j++)
@@ -45,7 +48,7 @@ void neuron::randomizeWeights(float beta)
     for(int k = 0; k < inputsCount; k++)
     {
         weights[k] = beta*weights[k]/norm;
-    }
+    }*/
 
 }
 
@@ -72,10 +75,10 @@ float neuron::tfuncSign(float sig)
 float neuron::tfuncSigmoid(float sig)
 {
     //speed of learning
-    int omicron = 0.5;
-    int omicron0 = 0.5;
+    float omicron = 0.0;
+    float omicron0 = 1.0;
 
-    return (1 /(1 + exp(-(sig+omicron)/omicron0)));
+    return (1.0 /(1.0 + exp( -(sig+omicron)/omicron0 )));
 
 }
 
@@ -84,9 +87,9 @@ float neuron::summate(float *inputs, int tfunc)
 {
     float signal = 0.0;
 
-    for(int i = 1; i < inputsCount; i++)
+    for(int i = 0; i < inputsCount; i++)
     {
-        signal += weights[i] * inputs[i];
+        signal += weights[i+1] * inputs[i];
     }
     signal += weights[0]; //activation weight
 

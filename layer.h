@@ -1,3 +1,4 @@
+#pragma once
 #include "neuron.h"
 
 class layer{
@@ -16,7 +17,7 @@ public:
 
     void constructNeurons(bool isRand, const char *fname);
 
-    float *computeOutput();
+    void computeOutput();
 
     bool writeNeuronsToFile(const char *fname);
     bool readNeuronsFromFile(const char *fname);
