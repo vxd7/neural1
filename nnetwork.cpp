@@ -1,5 +1,6 @@
-#include <nnetwork.h>
+#include "nnetwork.h"
 #define ISRAND true
+ofstream nnetworkErrLog("log.txt");
 
 neuralNetwork::neuralNetwork()
 {
@@ -47,12 +48,13 @@ bool neuralNetwork::initNetwork()
 	networkLayers = (layer *)calloc(layersCount, sizeof(layer));
 
 	networkLayers[0].initLayer(neuronsInLayers[0], inputVectorSize);
-	networkLayers[0].constructNeurons(ISRAND, fileNames[0]);
+	networkLayers[0].constructNeurons(ISRAND, fileNames[0].c_str());
 	for(int i = 1; i < layersCount; i++)
 	{
 		networkLayers[i].initLayer(neuronsInLayers[i], neuronsInLayers[i - 1]);
-		networkLayers[i].constructNeurons(ISRAND, fileNames[i]);
+		networkLayers[i].constructNeurons(ISRAND, fileNames[i].c_str());
 	}
+	return true;
 }
 
 void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of vector
@@ -60,8 +62,9 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
     FILE *fp;
     if((fp = fopen(fname, "rb+")) == NULL)
     {
-        fout<<"Error reading input vectors! Function neuralNetwork::getInput.";
+        nnetworkErrLog<<"Error reading input vectors! Function neuralNetwork::getInput.";
         exit(1);
+
     }
 
     fseek(fp, (sizeof(float) * inputVectorSize * k), SEEK_SET);
@@ -75,8 +78,9 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 
 }
 
-void neuralNetwork::scaleInput(float vecMax, float vecMin, int startInterval, int endInterval)
+void neuralNetwork::scaleInput(float vecMax, float vecMin,   int startInterval, int endInterval)
 {
+
     for(int i = 0; i < inputVectorSize; i++)
     {
         networkInput[i] = ((networkInput[i] - vecMin) * (endInterval - startInterval) / (vecMax - vecMin)) + endInterval;
@@ -109,6 +113,12 @@ void neuralNetwork::processLayersData()
         }
 
     }
+
+    for(int i = 0; i < neuronsInLayers[layersCount - 1]; i++)
+    {
+         networkOutput[i] = networkLayers[layersCount - 1].outputs[i];
+    }
+
 
     //reverseScaleOutput is done from main()
 

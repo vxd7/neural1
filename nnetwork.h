@@ -1,4 +1,6 @@
+#pragma once
 #include "layer.h"
+
 
 class neuralNetwork{
 public:
@@ -21,7 +23,7 @@ public:
 	void generateNames();
 
     void getInput(); //from keyboard
-	void getInput(const char *fname); //from file
+	void getInput(const char *fname, int k); //from file
 	void scaleInput(float vecMax, float vecMin, int startInterval, int endInterval); //Preprocess input vector in order to fit inc
 	void reverseScaleOutput(float vecMax, float vecMin, int startInterval, int endInterval);
 

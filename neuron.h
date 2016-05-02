@@ -12,6 +12,7 @@
 #define TFUNC 2 //activation function
 using namespace std;
 
+
 class neuron{
 public:
 	int inputsCount;
