@@ -25,6 +25,7 @@ int main()
     {
          cout<<network.networkOutput[i]<<" ";
     }
+    network.writeWeightsToFiles();
     fclose(fp);
     return 0;
 }

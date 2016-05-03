@@ -1,5 +1,5 @@
 #include "nnetwork.h"
-#define ISRAND true
+#define ISRAND false
 ofstream nnetworkErrLog("log.txt");
 
 neuralNetwork::neuralNetwork()
@@ -32,7 +32,7 @@ bool neuralNetwork::initNetwork()
 {
 	cout<<"Input the number of layers\n"; cin>>layersCount;
 	cout<<"Input the size of input vector\n"; cin>>inputVectorSize;
-	
+
 	neuronsInLayers = new int[layersCount];
 	networkInput = new float[inputVectorSize];
 
@@ -121,5 +121,12 @@ void neuralNetwork::processLayersData()
 
 
     //reverseScaleOutput is done from main()
+}
 
+void neuralNetwork::writeWeightsToFiles()
+{
+    for(int i = 0; i < layersCount; i++)
+    {
+        networkLayers[i].writeNeuronsToFile(fileNames[i].c_str());
+    }
 }

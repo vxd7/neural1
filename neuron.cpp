@@ -32,8 +32,11 @@ void neuron::randomizeWeights(float beta)
     for(int i = 1; i < inputsCount; i++)
     {
         //generates random weights for neuron's weights [-0.5...0.5]
-        weights[i] = static_cast <float> (rand()) / static_cast <float> (RAND_MAX * 1 - 0.5);
+        weights[i] = (float)rand()/(float)(RAND_MAX) * 1.0 - 0.5;
+        cout<<weights[i]<<" ";
     }
+    cout<<"\n";
+
 
     /*float norm;
     float squareSum = 0;
@@ -111,4 +114,3 @@ void neuron::outWeights(FILE *fp)
     }
 
 }
-

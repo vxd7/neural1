@@ -28,5 +28,6 @@ public:
 	void reverseScaleOutput(float vecMax, float vecMin, int startInterval, int endInterval);
 
 	void processLayersData();
+	void writeWeightsToFiles();
 
 };

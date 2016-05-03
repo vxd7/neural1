@@ -5,6 +5,7 @@ ofstream layersErrLog("log.txt");
 void layer::initLayer(int neuronsC, int inputC)
 {
     inputsCount = inputC;
+    inputsCount++; //because we want to preserve the activational weights
     numberOfNeurons = neuronsC;
 
 	inputs = new float[inputsCount];
@@ -58,7 +59,7 @@ void layer::computeOutput()
 bool layer::writeNeuronsToFile(const char *fname)
 {
     FILE *fp;
-    if((fp = fopen(fname, "rb+")) == NULL)
+    if((fp = fopen(fname, "wb+")) == NULL)
     {
         layersErrLog<<"Error writing weights to file. Layer:" << fname<<"\n";
         cout<<"Network is fucked!";
@@ -72,7 +73,7 @@ bool layer::writeNeuronsToFile(const char *fname)
     }
 
     fclose(fp);
-    //layersErrLog<<"Successfully written! Layer:" << fname<<"\n";
+    layersErrLog<<"Successfully written! Layer:" << fname<<"\n";
     return true;
 }
 
@@ -94,6 +95,7 @@ bool layer::readNeuronsFromFile(const char *fname)
 		{
 			fread(&curWeight, sizeof(float), 1, fp);
 			neurons[i].weights[j] = curWeight;
+
 		}
 	}
 
