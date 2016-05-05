@@ -155,15 +155,14 @@ void neuralNetwork::scaleInput(const char* fname, int startInterval, int endInte
 		/* And do the actual scaling */
 		for(int k = 0; k < inputVectorSize; k++)
 		{
-			networkInput[k] = ((networkInput[k] - vecMin) * (endInterval - startInterval) / (vecMax - vecMin)) + endInterval;
+			networkInput[k] = ((networkInput[k] - minComp) * (endInterval - startInterval) / (maxComp - minComp)) + endInterval;
 		}
 
 
 	}
 
-
-
 	fclose(fp);
+
 }
 
 void neuralNetwork::reverseScaleOutput(float vecMax, float vecMin, int startInterval, int endInterval)
