@@ -175,7 +175,7 @@ void neuralNetwork::scaleInput(const char* fname, int startInterval, int endInte
 
 		for(int j = 0; j < inputVectorSize; j++)
 		{
-			tmpComp = getInputVectorComponent(fp, i, j);
+			tmpComp = getInputVectorComponent(fp, j, i);
 			if(tmpComp > maxComp) maxComp = tmpComp;
 			if(tmpComp < minComp) minComp = tmpComp;	
 		}
@@ -218,7 +218,7 @@ void neuralNetwork::reverseScaleOutput(const char* fname, int startInterval, int
 
 		for(int j = 0; j < outputVectorSize; j++)
 		{
-			tmpComp = getOutputVectorComponent(fp, i, j);
+			tmpComp = getOutputVectorComponent(fp, j, i);
 			if(tmpComp > maxComp) maxComp = tmpComp;
 			if(tmpComp < minComp) minComp = tmpComp;	
 		}
