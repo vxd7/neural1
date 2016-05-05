@@ -168,12 +168,12 @@ void neuralNetwork::scaleInput(const char* fname, int startInterval, int endInte
 	int inputVectorCount = inputVectorNumber(fp);
 
 	/* Now we must find max and min first components throughout the all vectors */
-	for(int i = 0; i < inputVectorCount; i++)
+	for(int i = 0; i < inputVectorSize; i++)
 	{
 		minComp = getInputVectorComponent(fp, i, 0); 
 		maxComp = minComp;
 
-		for(int j = 0; j < inputVectorSize; j++)
+		for(int j = 0; j < inputVectorCount; j++)
 		{
 			tmpComp = getInputVectorComponent(fp, j, i);
 			if(tmpComp > maxComp) maxComp = tmpComp;
@@ -211,12 +211,12 @@ void neuralNetwork::reverseScaleOutput(const char* fname, int startInterval, int
 	int outputVectorCount = inputVectorNumber(fp); //the number of output vectors equals to the number of input ones
 
 	/* Now we must find max and min first components throughout the all vectors */
-	for(int i = 0; i < outputVectorCount; i++)
+	for(int i = 0; i < inputVectorSize; i++)
 	{
 		minComp = getOutputVectorComponent(fp, i, 0); 
 		maxComp = minComp;
 
-		for(int j = 0; j < outputVectorSize; j++)
+		for(int j = 0; j < outputVectorCount; j++)
 		{
 			tmpComp = getOutputVectorComponent(fp, j, i);
 			if(tmpComp > maxComp) maxComp = tmpComp;
