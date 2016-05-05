@@ -30,4 +30,7 @@ public:
 	void processLayersData();
 	void writeWeightsToFiles();
 
+	/* The number of input vectors in file */
+	int inputVectorNumber(FILE *fp);
+
 };

@@ -1,9 +1,11 @@
 #include "layer.h"
-ofstream layersErrLog("log.txt");
+ofstream layerLog("neuralog.txt");
 
 
 void layer::initLayer(int neuronsC, int inputC)
 {
+	layerLog << "class layer: Allocating memory\n";
+
     inputsCount = inputC;
     inputsCount++; //because we want to preserve the activational weights
     numberOfNeurons = neuronsC;
@@ -21,6 +23,8 @@ layer::layer()
 
 layer::~layer()
 {
+	layerLog << "class layer: Deleting allocated variables\n";
+
 	delete[] inputs;
 	delete[] outputs;
 	delete[] neurons;
@@ -34,6 +38,8 @@ float layer::computeBeta()
 
 void layer::constructNeurons(bool isRand, const char *fname)
 {
+	layerLog << "class layer: constructing neurons\n";
+
     float beta = computeBeta();
     for(int i = 0; i < numberOfNeurons; i++)
     {
@@ -49,6 +55,8 @@ void layer::constructNeurons(bool isRand, const char *fname)
 
 void layer::computeOutput()
 {
+	layerLog << "class layer: computing output\n";
+
     for(int i = 0; i < numberOfNeurons; i++)
     {
         outputs[i] = neurons[i].summate(inputs, TFUNC);
@@ -58,10 +66,12 @@ void layer::computeOutput()
 
 bool layer::writeNeuronsToFile(const char *fname)
 {
+	layerLog << "class layer: writing neurons to file\n";
+
     FILE *fp;
     if((fp = fopen(fname, "wb+")) == NULL)
     {
-        layersErrLog<<"Error writing weights to file. Layer:" << fname<<"\n";
+        layerLog<<"[ERROR] class layer: Error writing weights to file. Layer:" << fname<<"\n";
         cout<<"Network is fucked!";
         return false;
     }
@@ -73,16 +83,18 @@ bool layer::writeNeuronsToFile(const char *fname)
     }
 
     fclose(fp);
-    layersErrLog<<"Successfully written! Layer:" << fname<<"\n";
+    layerLog<<"class layer: Successfully written! Layer:" << fname<<"\n";
     return true;
 }
 
 bool layer::readNeuronsFromFile(const char *fname)
 {
+	layerLog << "class layer: reading neurons weights from file\n";
+
     FILE *fp;
     if((fp = fopen(fname, "rb+")) == NULL)
     {
-        layersErrLog<<"Cannot open file. Function readNeuronsFromFile\n";
+        layerLog<<"[ERROR] class layer: Cannot open file "<< fname << ". Function readNeuronsFromFile\n";
         return false;
     }
 

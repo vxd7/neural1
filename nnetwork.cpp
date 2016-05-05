@@ -5,6 +5,8 @@ ofstream nnetworkErrLog("log.txt");
 neuralNetwork::neuralNetwork()
 {
 	//fuck off!
+	inputVectorSize = -1;
+	inputVectorNumber = -1;
 }
 
 neuralNetwork::~neuralNetwork()
@@ -60,6 +62,7 @@ bool neuralNetwork::initNetwork()
 void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of vector
 {
     FILE *fp;
+
     if((fp = fopen(fname, "rb+")) == NULL)
     {
         nnetworkErrLog<<"Error reading input vectors! Function neuralNetwork::getInput.";
@@ -67,6 +70,15 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 
     }
 
+	/* k is indexed from 0 */
+	if(k > inputVectorNumber(fp) - 1)
+	{
+		networkErrLog<<"Incorrect ordinary number of input vector!";
+		fclose(fp);
+		exit(1);
+	}
+
+	/* inputVectorSize -- the number of components in the input vector */
     fseek(fp, (sizeof(float) * inputVectorSize * k), SEEK_SET);
 
     for(int i = 0; i < inputVectorSize; i++)
@@ -78,13 +90,80 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 
 }
 
-void neuralNetwork::scaleInput(float vecMax, float vecMin,   int startInterval, int endInterval)
+/**
+ * int vec -- ordinary number of a vector
+ * int comp -- ordinary number of a vec'th vector's component
+ * <p>
+ * V0=(x0, x1, x2);
+ * V1=(x0, x1, x2);
+ *
+ * vec = 0, comp = 2 <==> V0.x2
+ * vec = 1, comp = 3 <==> V1.x3
+ */
+float neuralNetwork::getInputVectorComponent(FILE *fp, int vec, int comp)
 {
+	float component;
 
-    for(int i = 0; i < inputVectorSize; i++)
+	/* Check whether given values are correct. (-1) because vec and comp are indexed from 0 */
+	if((vec > inputVectorNumber(fp) - 1) || (comp > inputVectorSize - 1))
+	{
+		networkErrLog << "Incorrect vector or component number! Cannot read " << vec <<"'th vector's "<< comp <<"'th component!";
+		exit(1);
+
+	}
+	/* Jump directly to the vec'th vector in the input file */
+    fseek(fp, (sizeof(float) * inputVectorSize * vec), SEEK_SET);
+
+	/* Jump to the comp'th component of the vec'th vector */
+	fseek(fp, (comp * sizeof(float)), SEEK_CUR);
+
+	/* Read the needed vector's component */
+	fread(&component, sizeof(float), 1, fp);
+
+	return component;
+
+}
+
+void neuralNetwork::scaleInput(const char* fname, int startInterval, int endInterval)
+{
+    FILE *fp;
+
+    if((fp = fopen(fname, "rb+")) == NULL)
     {
-        networkInput[i] = ((networkInput[i] - vecMin) * (endInterval - startInterval) / (vecMax - vecMin)) + endInterval;
+        nnetworkErrLog<<"Error reading input vectors! Function neuralNetwork::scaleInput.";
+        exit(1);
+
     }
+
+	float minComp, maxComp;
+	float tmpComp;
+	int inputVectorCount = inputVectorNumber(fp);
+
+	/* Now we must find max and min first components throughout the all vectors */
+	for(int i = 0; i < inputVectorCount; i++)
+	{
+		minComp = getInputVectorComponent(fp, i, 0); 
+		maxComp = minComp;
+
+		for(int j = 0; j < inputVectorSize; j++)
+		{
+			tmpComp = getInputVectorComponent(fp, i, j);
+			if(tmpComp > maxComp) maxComp = tmpComp;
+			if(tmpComp < minComp) minComp = tmpComp;	
+		}
+
+		/* And do the actual scaling */
+		for(int k = 0; k < inputVectorSize; k++)
+		{
+			networkInput[k] = ((networkInput[k] - vecMin) * (endInterval - startInterval) / (vecMax - vecMin)) + endInterval;
+		}
+
+
+	}
+
+
+
+	fclose(fp);
 }
 
 void neuralNetwork::reverseScaleOutput(float vecMax, float vecMin, int startInterval, int endInterval)
@@ -129,4 +208,17 @@ void neuralNetwork::writeWeightsToFiles()
     {
         networkLayers[i].writeNeuronsToFile(fileNames[i].c_str());
     }
+}
+
+int neuralNetwork::inputVectorNumber(FILE *fp)
+{
+	int num, pos;
+	pos = ftell(fp); //save our old position in file 
+
+	fseek(fp, 0, SEEK_END);
+	num = ftell(fp)/(inputVectorSize * sizeof(float));
+	fseek(fp, pos, SEEK_SET); //restore our old position
+
+	return num;
+
 }
