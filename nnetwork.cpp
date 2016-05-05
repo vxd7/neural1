@@ -5,8 +5,6 @@ ofstream nnetworkErrLog("log.txt");
 neuralNetwork::neuralNetwork()
 {
 	//fuck off!
-	inputVectorSize = -1;
-	inputVectorNumber = -1;
 }
 
 neuralNetwork::~neuralNetwork()
@@ -73,7 +71,7 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 	/* k is indexed from 0 */
 	if(k > inputVectorNumber(fp) - 1)
 	{
-		networkErrLog<<"Incorrect ordinary number of input vector!";
+		nnetworkErrLog<<"Incorrect ordinary number of input vector!";
 		fclose(fp);
 		exit(1);
 	}
@@ -108,7 +106,7 @@ float neuralNetwork::getInputVectorComponent(FILE *fp, int vec, int comp)
 	/* Check whether given values are correct. (-1) because vec and comp are indexed from 0 */
 	if((vec > inputVectorNumber(fp) - 1) || (comp > inputVectorSize - 1))
 	{
-		networkErrLog << "Incorrect vector or component number! Cannot read " << vec <<"'th vector's "<< comp <<"'th component!";
+		nnetworkErrLog << "Incorrect vector or component number! Cannot read " << vec <<"'th vector's "<< comp <<"'th component!";
 		exit(1);
 
 	}
@@ -134,7 +132,7 @@ float neuralNetwork::getOutputVectorComponent(FILE *fp, int vec, int comp)
 	/* Check whether given values are correct. (-1) because vec and comp are indexed from 0 */
 	if((vec > outputVectorCount - 1) || (comp > outputVectorSize - 1))
 	{
-		networkErrLog << "Incorrect vector or component number! Cannot read " << vec <<"'th vector's "<< comp <<"'th component!";
+		nnetworkErrLog << "Incorrect vector or component number! Cannot read " << vec <<"'th vector's "<< comp <<"'th component!";
 		exit(1);
 
 	}
@@ -224,9 +222,9 @@ void neuralNetwork::reverseScaleOutput(const char* fname, int startInterval, int
 		}
 
 		/* And do the actual scaling */
-		for(knt k = 0; k < outputVectorSize; k++)
+		for(int k = 0; k < outputVectorSize; k++)
 		{
-			networkOutput[k] = vecMin + ((networkOutput[k] - startInterval) * (vecMax - vecMin) / (endInterval - startInterval));
+			networkOutput[k] = minComp + ((networkOutput[k] - startInterval) * (maxComp - minComp) / (endInterval - startInterval));
 		}
 
 	}
@@ -238,7 +236,7 @@ void neuralNetwork::processLayersData()
 {
     //getInput and scaleInput are executed from main()
     //We have scaled input vector now
-    for(int i = 0; i < networkLayers[0].inputsCount; i++)
+    for(int i = 1; i < networkLayers[0].inputsCount; i++)
     {
         networkLayers[0].inputs[i] = networkInput[i];
     }
@@ -246,7 +244,7 @@ void neuralNetwork::processLayersData()
     for(int i = 0; i < layersCount; i++)
     {
         networkLayers[i].computeOutput();
-        for(int j = 0; j < networkLayers[i + 1].inputsCount; j++)
+        for(int j = 1; j < networkLayers[i + 1].inputsCount; j++)
         {
             networkLayers[i + 1].inputs[j] = networkLayers[i].outputs[j];
         }
