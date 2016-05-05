@@ -30,6 +30,10 @@ public:
 	void processLayersData();
 	void writeWeightsToFiles();
 
+
+	float getInputVectorComponent(FILE *fp, int vec, int comp);
+	float getOutputVectorComponent(FILE *fp, int vec, int comp);
+
 	/* The number of input vectors in file */
 	int inputVectorNumber(FILE *fp);
 

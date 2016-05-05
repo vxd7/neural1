@@ -90,6 +90,7 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 
 }
 
+/* UNTESTED FUNCTION! */
 /**
  * int vec -- ordinary number of a vector
  * int comp -- ordinary number of a vec'th vector's component
@@ -124,6 +125,33 @@ float neuralNetwork::getInputVectorComponent(FILE *fp, int vec, int comp)
 
 }
 
+float neuralNetwork::getOutputVectorComponent(FILE *fp, int vec, int comp)
+{
+	float component;
+	int outputVectorSize = neuronsInLayers[layersCount - 1];
+	int outputVectorCount = inputVectorNumber(fp); //the number of output vecrors equals to the number og input ones
+
+	/* Check whether given values are correct. (-1) because vec and comp are indexed from 0 */
+	if((vec > outputVectorCount - 1) || (comp > outputVectorSize - 1))
+	{
+		networkErrLog << "Incorrect vector or component number! Cannot read " << vec <<"'th vector's "<< comp <<"'th component!";
+		exit(1);
+
+	}
+	/* Jump directly to the vec'th vector in the input file */
+    fseek(fp, (sizeof(float) * outputVectorSize * vec), SEEK_SET);
+
+	/* Jump to the comp'th component of the vec'th vector */
+	fseek(fp, (comp * sizeof(float)), SEEK_CUR);
+
+	/* Read the needed vector's component */
+	fread(&component, sizeof(float), 1, fp);
+
+	return component;
+
+}
+
+/* UNTESTED FUNCTION! */
 void neuralNetwork::scaleInput(const char* fname, int startInterval, int endInterval)
 {
     FILE *fp;
@@ -165,12 +193,45 @@ void neuralNetwork::scaleInput(const char* fname, int startInterval, int endInte
 
 }
 
-void neuralNetwork::reverseScaleOutput(float vecMax, float vecMin, int startInterval, int endInterval)
+/* UNTESTED FUNCTION! */
+void neuralNetwork::reverseScaleOutput(const char* fname, int startInterval, int endInterval)
 {
-    for(int i = 0; i < (sizeof(networkOutput) / sizeof(float)); i++)
+    FILE *fp;
+
+    if((fp = fopen(fname, "rb+")) == NULL)
     {
-        networkOutput[i] = vecMin + ((networkOutput[i] - startInterval) * (vecMax - vecMin) / (endInterval - startInterval));
+        nnetworkErrLog<<"Error reading output vectors! Function neuralNetwork::reverseScaleOutput.";
+        exit(1);
+
     }
+
+	float minComp, maxComp;
+	float tmpComp;
+	int outputVectorSize = neuronsInLayers[layersCount - 1];
+	int outputVectorCount = inputVectorNumber(fp); //the number of output vectors equals to the number of input ones
+
+	/* Now we must find max and min first components throughout the all vectors */
+	for(int i = 0; i < outputVectorCount; i++)
+	{
+		minComp = getOutputVectorComponent(fp, i, 0); 
+		maxComp = minComp;
+
+		for(int j = 0; j < outputVectorSize; j++)
+		{
+			tmpComp = getOutputVectorComponent(fp, i, j);
+			if(tmpComp > maxComp) maxComp = tmpComp;
+			if(tmpComp < minComp) minComp = tmpComp;	
+		}
+
+		/* And do the actual scaling */
+		for(knt k = 0; k < outputVectorSize; k++)
+		{
+			networkOutput[k] = vecMin + ((networkOutput[k] - startInterval) * (vecMax - vecMin) / (endInterval - startInterval));
+		}
+
+	}
+
+	fclose(fp);
 }
 
 void neuralNetwork::processLayersData()
