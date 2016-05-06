@@ -33,7 +33,7 @@ layer::~layer()
 float layer::computeBeta()
 {
     float magicConst = 0.7;
-    return (magicConst*pow( (float)numberOfNeurons, (1.0/(float)inputsCount) ));
+    return (magicConst*pow( (float)numberOfNeurons, (float)(1.0/(float)inputsCount) ));
 }
 
 void layer::constructNeurons(bool isRand, const char *fname)
@@ -103,12 +103,15 @@ bool layer::readNeuronsFromFile(const char *fname)
 	fseek(fp, 0, SEEK_SET); //jump to the start of file
 	for(int i = 0; i < numberOfNeurons; i++)
 	{
-		for(int j = 1; j < inputsCount; j++)
+		for(int j = 0; j < inputsCount; j++)
 		{
+			
 			fread(&curWeight, sizeof(float), 1, fp);
 			neurons[i].weights[j] = curWeight;
+			cout<<curWeight<<' ';
 
 		}
+		cout<<'\n';
 	}
 
 	fclose(fp);

@@ -37,4 +37,11 @@ public:
 	/* The number of input vectors in file */
 	int inputVectorNumber(FILE *fp);
 
+	/* Gradient descent learning algo */
+	float** allLayerError;
+	void learn(const char* fname, int tempo);
+	//void gradientDescent(float *sample, int neuronCount, float tempo);
+	void layerError(float *sample, float* nextLayerError, int layerNumber); 
+	void lastLayerError(float *sample);
+
 };

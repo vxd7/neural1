@@ -18,8 +18,7 @@ void neuron::initNeuron(int inputs, float beta, bool isRand){
 
 neuron::neuron()
 {
-    //seed random pool
-    srand (static_cast <unsigned> (time(0)));
+    
 }
 neuron::~neuron()
 {
@@ -28,7 +27,7 @@ neuron::~neuron()
 
 void neuron::randomizeWeights(float beta)
 {
-
+	 
     for(int i = 1; i < inputsCount; i++)
     {
         //generates random weights for neuron's weights [-0.5...0.5]
@@ -55,17 +54,6 @@ void neuron::randomizeWeights(float beta)
 
 }
 
-/*Changes weights of the current neuron.
- * Input:
- * int *delta-- vector
- * */
-void neuron::changeWeights(int *delta)
-{
-    for(int i = 0; i < inputsCount; i++)
-    {
-        weights[i] += delta[i];
-    }
-}
 
 //Treshold function
 float neuron::tfuncSign(float sig)
@@ -90,9 +78,9 @@ float neuron::summate(float *inputs, int tfunc)
 {
     float signal = 0.0;
 
-    for(int i = 0; i < inputsCount; i++)
+    for(int i = 0; i < inputsCount-1; i++)
     {
-        signal += weights[i+1] * inputs[i];
+        signal += weights[i+1] * inputs[i+1];
     }
     signal += weights[0]; //activation weight
 
@@ -108,6 +96,7 @@ float neuron::summate(float *inputs, int tfunc)
 void neuron::outWeights(FILE *fp)
 {
     fseek(fp, 0, SEEK_END);
+	/* Write activ weight too */
     for(int i = 0; i < inputsCount; i++)
     {
         fwrite((weights + i), sizeof(float), 1, fp);

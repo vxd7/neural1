@@ -1,10 +1,12 @@
 #include "nnetwork.h"
-#define ISRAND false
+#define ISRAND true
 ofstream nnetworkErrLog("log.txt");
 
 neuralNetwork::neuralNetwork()
 {
 	//fuck off!
+	//seed random pool
+    srand (static_cast <unsigned> (time(0)));
 }
 
 neuralNetwork::~neuralNetwork()
@@ -15,6 +17,7 @@ neuralNetwork::~neuralNetwork()
 	delete[] fileNames;
 	delete[] networkInput;
 	delete[] networkOutput;
+
 }
 
 void neuralNetwork::generateNames()
@@ -238,7 +241,7 @@ void neuralNetwork::processLayersData()
     //We have scaled input vector now
     for(int i = 1; i < networkLayers[0].inputsCount; i++)
     {
-        networkLayers[0].inputs[i] = networkInput[i];
+        networkLayers[0].inputs[i] = networkInput[i-1];
     }
 
     for(int i = 0; i < layersCount; i++)
@@ -246,7 +249,7 @@ void neuralNetwork::processLayersData()
         networkLayers[i].computeOutput();
         for(int j = 1; j < networkLayers[i + 1].inputsCount; j++)
         {
-            networkLayers[i + 1].inputs[j] = networkLayers[i].outputs[j];
+            networkLayers[i + 1].inputs[j] = networkLayers[i].outputs[j-1];
         }
 
     }
@@ -279,4 +282,117 @@ int neuralNetwork::inputVectorNumber(FILE *fp)
 
 	return num;
 
+}
+
+/* Gradient descent learning algo */
+void neuralNetwork::learn(const char* fname, int tempo)
+{
+	FILE* fp;
+	if((fp = fopen(fname, "rb+")) == NULL)
+	{
+		nnetworkErrLog << "Error opening learning samples file!";
+		exit(1);
+	}
+	
+	float** allLayerError = new float* [layersCount];
+	for(int i = 0; i < layersCount; i++)
+	{
+		allLayerError[i] = new float[neuronsInLayers[i]];
+		fill_n(allLayerError[i], neuronsInLayers[i], 0); //assign 0
+	}
+
+	/*get sample*/
+	int sampleVectorSize = neuronsInLayers[layersCount - 1];
+
+	int sampleVectorNumber;
+	fseek(fp, 0, SEEK_END);
+	sampleVectorNumber = ftell(fp)/(sampleVectorSize * sizeof(float));
+
+	float* sample = new float[sampleVectorSize];
+	
+
+	fseek(fp, 0, SEEK_SET);
+	for(int i = 0; i < sampleVectorNumber; i++)
+	{
+		for(int j = 0; j < sampleVectorSize; j++)
+		{
+			fread(&sample[i], sizeof(float), 1, fp);
+		}
+
+		lastLayerError(sample);
+
+		for(int k = layersCount - 1; k > 0; --k)
+		{
+			layerError(sample, allLayerError[k], k);
+		}
+	}
+	//refucktoring
+	float delta = 0.0;
+	for(int i = 1; i < layersCount - 1; i++)
+	{
+		for(int j = 0; j < neuronsInLayers[i]; j++)
+		{
+			/* Weights of the i'th layer's j'th neuron */
+			for(int k = 1; k < networkLayers[i].neurons[j].inputsCount - 1; k++)
+			{
+				/* Errors of the (i + 1)'th layer's j'th neuron */
+				for(int h = 0; h < neuronsInLayers[i + 1]; h++)
+				{
+					delta = tempo * allLayerError[i + 1][h] * 
+						(networkLayers[i + 1].outputs[k - 1] * (1 - networkLayers[i + 1].outputs[k - 1])) * 
+						networkLayers[i - 1].outputs[k];
+					networkLayers[i].neurons[j].weights[k] -= delta;
+				}
+				
+			}
+		}
+	}
+
+	//For the zeroth layer:
+	for(int j = 0; j < neuronsInLayers[0]; j++)
+		{
+			/* Weights of the 0'th layer's j'th neuron */
+			for(int k = 1; k < networkLayers[0].neurons[j].inputsCount - 1; k++)
+			{
+				/* Errors of the (0 + 1)'th layer's j'th neuron */
+				for(int h = 0; h < neuronsInLayers[0 + 1]; h++)
+				{
+					delta = tempo * allLayerError[0 + 1][h] * 
+						(networkLayers[0 + 1].outputs[k - 1] * (1 - networkLayers[0 + 1].outputs[k - 1])) * 
+						networkInput[k];
+					networkLayers[0].neurons[j].weights[k] -= delta;
+				}
+				
+			}
+		}
+
+	
+
+}
+
+void neuralNetwork::lastLayerError(float *sample)
+{
+	int neuronsLastLayer = neuronsInLayers[layersCount - 1];
+
+	for(int i = 0; i < neuronsLastLayer; i++)
+	{
+		allLayerError[layersCount - 1][i] = networkOutput[i] - sample[i];
+	}
+}
+
+																
+void neuralNetwork::layerError(float *sample, float* nextLayerError, int layerNumber)
+{
+	int currLayerNeurons = neuronsInLayers[layerNumber]; /* Indexing from ZERO */ 
+
+	for(int i = 0; i < neuronsInLayers[layerNumber]; i++)
+	{ 
+		for(int j = 0; j < neuronsInLayers[layerNumber + 1]; j++)
+		{
+			//networkLayers[layerNumber + 1].neurons[j].weights[i];	
+			allLayerError[layerNumber][i] += allLayerError[layerNumber + 1][i] * 
+				(networkLayers[layerNumber + 1].outputs[j] * (1 - networkLayers[layerNumber + 1].outputs[j])) *
+				networkLayers[layerNumber + 1].neurons[j].weights[i + 1];
+		}
+	}
 }

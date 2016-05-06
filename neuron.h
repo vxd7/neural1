@@ -7,6 +7,8 @@
 
 #include <string>
 
+#include <algorithm>
+
 //#include "layers.h"
 
 #define TFUNC 2 //activation function
@@ -28,8 +30,6 @@ public:
 	void initNeuron(int inputs, float beta, bool isRand);
 
 	void randomizeWeights(float beta);
-
-	void changeWeights(int *delta);
 
 	//Treshold function
 	float tfuncSign(float sig);
