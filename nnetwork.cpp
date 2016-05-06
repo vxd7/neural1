@@ -1,10 +1,12 @@
 #include "nnetwork.h"
-#define ISRAND false
+#define ISRAND true
 ofstream nnetworkErrLog("log.txt");
 
 neuralNetwork::neuralNetwork()
 {
 	//fuck off!
+	//seed random pool
+    srand (static_cast <unsigned> (time(0)));
 }
 
 neuralNetwork::~neuralNetwork()
@@ -238,7 +240,7 @@ void neuralNetwork::processLayersData()
     //We have scaled input vector now
     for(int i = 1; i < networkLayers[0].inputsCount; i++)
     {
-        networkLayers[0].inputs[i] = networkInput[i];
+        networkLayers[0].inputs[i] = networkInput[i-1];
     }
 
     for(int i = 0; i < layersCount; i++)
@@ -246,7 +248,7 @@ void neuralNetwork::processLayersData()
         networkLayers[i].computeOutput();
         for(int j = 1; j < networkLayers[i + 1].inputsCount; j++)
         {
-            networkLayers[i + 1].inputs[j] = networkLayers[i].outputs[j];
+            networkLayers[i + 1].inputs[j] = networkLayers[i].outputs[j-1];
         }
 
     }

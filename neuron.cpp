@@ -28,7 +28,7 @@ neuron::~neuron()
 
 void neuron::randomizeWeights(float beta)
 {
-
+	 
     for(int i = 1; i < inputsCount; i++)
     {
         //generates random weights for neuron's weights [-0.5...0.5]
@@ -90,9 +90,9 @@ float neuron::summate(float *inputs, int tfunc)
 {
     float signal = 0.0;
 
-    for(int i = 0; i < inputsCount; i++)
+    for(int i = 0; i < inputsCount-1; i++)
     {
-        signal += weights[i+1] * inputs[i];
+        signal += weights[i+1] * inputs[i+1];
     }
     signal += weights[0]; //activation weight
 

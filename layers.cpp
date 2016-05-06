@@ -33,7 +33,7 @@ layer::~layer()
 float layer::computeBeta()
 {
     float magicConst = 0.7;
-    return (magicConst*pow( (float)numberOfNeurons, (1.0/(float)inputsCount) ));
+    return (magicConst*pow( (float)numberOfNeurons, (float)(1.0/(float)inputsCount) ));
 }
 
 void layer::constructNeurons(bool isRand, const char *fname)

@@ -1,6 +1,6 @@
 #include <iostream>
 #include "nnetwork.h"
-
+#include <conio.h>
 int main()
 {
     neuralNetwork network;
@@ -27,5 +27,6 @@ int main()
     }
     network.writeWeightsToFiles();
     fclose(fp);
+	_getch();
     return 0;
 }
