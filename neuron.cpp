@@ -7,7 +7,7 @@ void neuron::initNeuron(int inputs, float beta, bool isRand){
 	weights = new float[inputsCount];
     output = 0.0;
 
-    nmin = 1; //пороговое значение
+    nmin = 0.0; //пороговое значение
     weights[0] = nmin;
 
 

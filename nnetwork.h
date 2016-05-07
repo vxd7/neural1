@@ -39,9 +39,9 @@ public:
 
 	/* Gradient descent learning algo */
 	float** allLayerError;
-	void learn(const char* fname, int tempo);
+	void learn(const char* fname, const char* fname_in, float tempo);
 	//void gradientDescent(float *sample, int neuronCount, float tempo);
-	void layerError(float *sample, float* nextLayerError, int layerNumber); 
-	void lastLayerError(float *sample);
+	void layerError(float *sample, float* nextLayerError, int layerNumber, float** allLayerError); 
+	void lastLayerError(float *sample,float **allLayerError);
 
 };
