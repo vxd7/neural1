@@ -1,6 +1,5 @@
 #include <iostream>
 #include "nnetwork.h"
-#include <conio.h>
 int main()
 {
     neuralNetwork network;
@@ -18,10 +17,12 @@ int main()
     }
     fclose(fp);
     fp=fopen("layer0input.bin","rb+");*/
+	/*
     network.getInput("SamplesInputsFile.bin",0);
     network.scaleInput("SamplesInputsFile.bin", 0.0, 1.0);
 	network.processLayersData();
 	network.reverseScaleOutput("SamplesOutputsFile.bin", 0.0, 1.0); 
+	*/
     network.learn("SamplesOutputsFile.bin", "SamplesInputsFile.bin", 0.1);
    /* for(int i = 0; i < network.neuronsInLayers[network.layersCount - 1]; i++)
     {
@@ -29,7 +30,6 @@ int main()
     }*/
    // network.writeWeightsToFiles();
    // fclose(fp);
-	_getch();
 
 	return 0;
 }
