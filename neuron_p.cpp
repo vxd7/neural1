@@ -12,10 +12,10 @@ neuron::neuron(bool rand = false)
 	output = 0.0
 }
 
-void neuron::initNeuron(int inputs)
+void neuron::initNeuron(int inputSize)
 {
 	/*Set the number of inputs to the current neuron */
-    inputsCount = inputs;
+    inputsCount = inputSize;
 
 	/*Initialize the weights vector */
 	/* Weights are indexed FROM ZERO, 

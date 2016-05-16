@@ -26,7 +26,7 @@ public:
 	neuron(bool rand = false); /**< Constructor with optional parameter -- randomization flag. If set, randomization is performed */
 	~neuron();
 
-	void initNeuron(int inputs); /**< Initializes the neuron. Sets inputs, randomizes if needed */
+	void initNeuron(int inputSize); /**< Initializes the neuron. Sets inputs, randomizes if needed */
 	void randomizeWeights(); /**< Function for weights' randomization */
 
 	float tfunc(float sighal); /**< Threshold finction */
