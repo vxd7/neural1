@@ -1,5 +1,5 @@
 #pragma once
-#include "neuron.h"
+#include "neuron_p.h"
 
 class layer{
 private:
