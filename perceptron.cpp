@@ -207,8 +207,20 @@ void perceptron::processData()
 	for(int i = 0; i < inputVectorSize; i++) {
 		pnOutput[i] = pnLayer.output[i];
 	}
+
+	/* TODO:
+	 * 1. Write input to file (or append);
+	 * 2. Write function for viewing this output file;
+	 */ 
 }
-void writeWeightsToFile();
+void writeWeightsToFile()
+{
+	/* TODO:
+	 * 1. Code this function;
+	 * 2. Test reading function;
+	 * 3. Test everything connected with files;
+	 */
+}
 
 int getComponentCount(FILE* fp, float component_size)
 {
