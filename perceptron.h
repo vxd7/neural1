@@ -94,7 +94,9 @@ public:
 	void reverseScaleOutput(int startInterval, int endInterval);
 
 	void processData();
-	void writeWeightsToFile();
+	bool writeAnsToFile();
+
+	vector<float> readVectorFromFile(FILE *fp, int start, int end, bool print);
 
 
 	float getInputVectorComponent(int vec, int comp);
@@ -102,6 +104,7 @@ public:
 
 	/* The number of input vectors in file */
 	int getComponentCount(FILE* fp, float component_size);
+	void writeWeightsToFile();
 	
 };
 

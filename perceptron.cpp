@@ -204,25 +204,110 @@ void perceptron::processData()
 
 	pnLayer.computeOutput();
 
-	for(int i = 0; i < inputVectorSize; i++) {
+	for(int i = 0; i < neuronCount; i++) {
 		pnOutput[i] = pnLayer.output[i];
 	}
 
-	/* TODO:
-	 * 1. Write input to file (or append);
-	 * 2. Write function for viewing this output file;
-	 */ 
-}
-void writeWeightsToFile()
-{
-	/* TODO:
-	 * 1. Code this function;
-	 * 2. Test reading function;
-	 * 3. Test everything connected with files;
+	writeVectorToFile(pnOutputFile, pnOutput, neuronCount);
+
+	/**
+	 * Read written vectors from 0'th to the last one
+	 * (neuronCount - 1) because 3'rd argument indexes from 0
 	 */
+	readVectorFromFile(pnOutputFile, 0, neuronCount - 1, true);
+
 }
 
-int getComponentCount(FILE* fp, float component_size)
+/**
+ * Simply writes given array to the file
+ */
+bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1)
+{
+	if(fp== NULL) {
+		/* Log error here */
+		exit(1);
+	}
+
+	fseek(fp, 0, SEEK_END);
+	
+	/* Log here*/ 
+
+	if(n == -1) n = getComponentCount(fp, sizeof(float));
+
+	for(int i = 0; i < n; i++) {
+		fwrite(arr[i], sizeof(float), 1, fp);
+	}
+
+	/* Write everything without closing file */
+	fflush(fp);
+
+	return true;
+}
+
+/**
+ * Read vectors from file starting with number `start' and ending with number `end' INCLUSIVE
+ * fp -- pointer to the file to read from ;
+ * start -- starting vector, indexes from 0 ;
+ * end -- ending vector, indexes from 0 ;
+ * print -- whether we want to print everything to STDOUT.
+ */
+vector<float> perceptron::readVectorFromFile(FILE *fp, int start, int end, bool print)
+{
+
+	vector<float> tmp;
+	float comp;
+
+	if(fp == NULL) {
+		/* Log here */
+		exit(1);
+	}
+	
+	/**
+	 * Check if everything is correct
+	 */
+	if( (start < 0) || (end > getComponentCount(fp, sizeof(float)) * sizeof(float) - 1) ) {
+		/* Log here */
+		exit(1);
+	}
+
+	if(end > start) {
+		/* Log here */
+		exit(1);
+	}
+
+	/**
+	 * <=end because indexation is from 0 and we are reading vectors inclusively */
+	for(int i = start; i <= end; i++) {
+
+		fread(&comp, sizeof(float), 1, fp);
+		tmp.push_back(comp);
+	}
+
+	if(print) {
+		cout << "{";
+		for(int i = 0; i < tmp.size(); i++) {
+			cout << tmp[i] << ", "
+		}
+		cout << '\b\b' << "}"; //'\b' -- one position backwards
+		cout<<"\n";
+	}
+
+	return tmp;
+	
+}
+void perceptron::writeWeightsToFile()
+{
+
+	if(pnBkpFile == NULL) {
+		/* Log here */
+		exit(1);
+	}
+
+	for(int i = 0; i < neuronCount; i++) {
+	}
+}
+
+int perceptron::getComponentCount(FILE* fp, float component_size)
 {
 	int num, pos;
 	pos = ftell(fp); //save our old position in file 
