@@ -19,8 +19,8 @@ public:
 
 	void computeOutput();
 
-	bool writeNeuronsToFile(const char *fname);
-	bool readNeuronsFromFile(const char *fname);
+	bool writeNeuronsToFile(FILE *fp);
+	bool readNeuronsFromFile(FILE *fp);
 
 	
 };

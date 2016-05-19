@@ -94,8 +94,8 @@ public:
 	void reverseScaleOutput(int startInterval, int endInterval);
 
 	void processData();
-	bool writeAnsToFile();
 
+	bool writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1);
 	vector<float> readVectorFromFile(FILE *fp, int start, int end, bool print);
 
 

@@ -18,7 +18,7 @@ void layer::initLayer(int neuronCount, int inputSize)
 	output.resize(numberOfNeurons);
 
 }
-void constructNeurons(bool isRand, const char *fname = NULL)
+void layer::constructNeurons(bool isRand, const char *fname = NULL)
 {
 	/* LOG HERE */
 
@@ -48,7 +48,7 @@ void constructNeurons(bool isRand, const char *fname = NULL)
 
 }
 
-void computeOutput()
+void layer::computeOutput()
 {
 	/* Log here */
 
@@ -59,5 +59,10 @@ void computeOutput()
 
 }
 
-bool writeNeuronsToFile(const char *fname);
-bool readNeuronsFromFile(const char *fname);
+bool layer::writeNeuronsToFile(FILE *fp)
+{
+	for(int i = 0; i < numberOfNeurons; i++) { 
+		neurons[i].
+	}
+}
+bool layer::readNeuronsFromFile(FILE *fp);

@@ -70,3 +70,14 @@ void neuron::summate(vector<float> &input)
 	output = signal;
 
 }
+
+void neuron::writeWeights(FILE *fp)
+{
+    fseek(fp, 0, SEEK_END);
+
+    for(int i = 0; i < inputsCount; i++)
+    {
+        fwrite((weights + i), sizeof(float), 1, fp);
+    }
+
+}
