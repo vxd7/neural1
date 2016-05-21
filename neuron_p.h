@@ -24,6 +24,7 @@ public:
 	bool isRand; /**< Whether we want to randomize out weights in current neuron */
 
 	neuron(bool rand = false); /**< Constructor with optional parameter -- randomization flag. If set, randomization is performed */
+	neuron();
 	~neuron();
 
 	void initNeuron(int inputSize); /**< Initializes the neuron. Sets inputs, randomizes if needed */

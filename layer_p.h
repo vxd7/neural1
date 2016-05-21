@@ -1,4 +1,3 @@
-#pragma once
 #include "neuron_p.h"
 
 class layer{

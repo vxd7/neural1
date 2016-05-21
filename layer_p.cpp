@@ -1,3 +1,5 @@
+#include "layer_p.h"
+
 layer::layer()
 {
 	
@@ -14,11 +16,11 @@ void layer::initLayer(int neuronCount, int inputSize)
 	numberOfNeurons = neuronCount;
 	inputVectorSize = inputSize;
 	
-	input.resize(inputsCount);
+	input.resize(inputVectorSize);
 	output.resize(numberOfNeurons);
 
 }
-void layer::constructNeurons(bool isRand, const char *fname = NULL)
+void layer::constructNeurons(bool isRand, const char *fname /*= NULL*/)
 {
 	/* LOG HERE */
 
@@ -27,8 +29,9 @@ void layer::constructNeurons(bool isRand, const char *fname = NULL)
 	 * neuron(isRand) -- a call to the constructor with an 
 	 * optional bool parameter
 	 */
-	for(int i = 0; i < neuronCount; i++) {
+	for(int i = 0; i < numberOfNeurons; i++) {
 		neurons.push_back(neuron(isRand));
+		
 
 		/**
 		 * The number of weight equals to the size
@@ -43,7 +46,7 @@ void layer::constructNeurons(bool isRand, const char *fname = NULL)
 	 * if the optional argument is present -- read neurons from file
 	 */
 	if(fname != NULL) {
-		readNeuronsFromFile(fname);
+		//readNeuronsFromFile(fname);
 	}
 
 }
@@ -62,7 +65,12 @@ void layer::computeOutput()
 bool layer::writeNeuronsToFile(FILE *fp)
 {
 	for(int i = 0; i < numberOfNeurons; i++) { 
-		neurons[i].
+	//	neurons[i].
 	}
+
+	return true;
 }
-bool layer::readNeuronsFromFile(FILE *fp);
+bool layer::readNeuronsFromFile(FILE *fp)
+{
+	return true;
+}

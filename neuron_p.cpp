@@ -1,6 +1,6 @@
 #include "neuron_p.h"
 
-neuron::neuron(bool rand = false)
+neuron::neuron(bool rand /*= false*/)
 {
 	/* Set randomization variable */
 	isRand = rand;	
@@ -9,7 +9,17 @@ neuron::neuron(bool rand = false)
 	aWeight = 1.0;
 
 	/* Reset the output */
-	output = 0.0
+	output = 0.0;
+}
+
+neuron::neuron()
+{
+	
+}
+
+neuron::~neuron()
+{
+	
 }
 
 void neuron::initNeuron(int inputSize)
@@ -21,7 +31,7 @@ void neuron::initNeuron(int inputSize)
 	/* Weights are indexed FROM ZERO, 
 	 * activational weight doesn't count AT ALL */
 	for(int i = 0; i < inputsCount; i++)
-		weights.push_back(float);
+		weights.push_back(0.0);
 		
 	/* If the randomization flag is set -- then do the randomization */
 	if(isRand)
@@ -60,7 +70,7 @@ void neuron::summate(vector<float> &input)
 	/* Sum up */
     for(int i = 0; i < inputsCount; i++)
     {
-        signal += weights[i] * inputs[i];
+        signal += weights[i] * input[i];
     }
 
 	/* And execute threshold function */
@@ -77,7 +87,7 @@ void neuron::writeWeights(FILE *fp)
 
     for(int i = 0; i < inputsCount; i++)
     {
-        fwrite((weights + i), sizeof(float), 1, fp);
+        fwrite(&weights[i], sizeof(float), 1, fp);
     }
 
 }
