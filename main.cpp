@@ -1,11 +1,11 @@
 #include <iostream>
 #include "nnetwork.h"
-
+#include <conio.h>
 int main()
 {
     neuralNetwork network;
     network.initNetwork();
-    FILE *fp=fopen("layer0input.bin","wb+");
+    /*FILE *fp=fopen("layer0input.bin","wb+");
     float temp;
     int kol;
     cout<<"enter kol\n";
@@ -17,14 +17,19 @@ int main()
         fwrite(&temp,sizeof(float),1,fp);
     }
     fclose(fp);
-    fp=fopen("layer0input.bin","rb+");
-    network.getInput("layer0input.bin",0);
-   // network.scaleInput(0.0,10.0,0.0,1.0);
-    network.processLayersData();
+    fp=fopen("layer0input.bin","rb+");*/
+    network.getInput("SamplesInputsFile.bin",0);
+    network.scaleInput("SamplesInputsFile.bin", 0.0, 1.0);
+	network.processLayersData();
+	network.reverseScaleOutput("SamplesOutputsFile.bin", 0.0, 1.0); 
+    //network.learn("SamplesOutputsFile.bin", "SamplesInputsFile.bin", 0.1);
     for(int i = 0; i < network.neuronsInLayers[network.layersCount - 1]; i++)
     {
          cout<<network.networkOutput[i]<<" ";
     }
-    fclose(fp);
-    return 0;
+   // network.writeWeightsToFiles();
+   // fclose(fp);
+	_getch();
+
+	return 0;
 }

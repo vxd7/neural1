@@ -1,0 +1,6 @@
+class layer: Allocating memory
+class layer: constructing neurons
+class layer: Allocating memory
+class layer: constructing neurons
+class layer: computing output
+class layer: computing output
