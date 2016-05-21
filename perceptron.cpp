@@ -1,6 +1,6 @@
 #include "perceptron.h"
 
-perceptron::perceptron(bool rnd = false)
+perceptron::perceptron(bool rnd /*= false*/)
 {
 	/**
 	 * Generate the seed for the weights randomiation
@@ -55,7 +55,7 @@ bool perceptron::initNetwork()
 	return true;
 }
 
-bool perceptron::initFiles(string inputFile, string outputFile = "", string bkpFile = "")
+bool perceptron::initFiles(string inputFile, string outputFile /*= ""*/, string bkpFile /*= ""*/)
 {
 	inputFileName = inputFile;
 	outputFileName = outputFile;
@@ -117,7 +117,7 @@ void perceptron::getInput(int k)
 	 * Check whether we have correctly opened descriptor in our class
 	 * If no -- there may be a serious error
 	 */
-	if(pnInput == NULL) {
+	if(pnInputFile == NULL) {
 		/* Log error here */
 		exit(1);
 	}
@@ -129,10 +129,10 @@ void perceptron::getInput(int k)
 		exit(1);
 	}
 
-	fseek(fp, sizeof(float) * inputVectorSize * k, SEEK_SET);
+	fseek(pnInputFile, sizeof(float) * inputVectorSize * k, SEEK_SET);
 
 	for(int i = 0; i < inputVectorSize; i++) {
-		fread(&pnInput[i], sizeof(float), 1, pnInput);
+		fread(&pnInput[i], sizeof(float), 1, pnInputFile);
 	}
 	
 }
@@ -146,24 +146,25 @@ float perceptron::getInputVectorComponent(int vec, int comp)
 	float component;
 
 	/* Check whether given values are correct. (-1) because vec and comp are indexed from 0 */
-	if(comp > (inputVectorSize - 1) || (vec > (getComponentCount(pnInput, sizeof(float))/inputVectorSize - 1) {
+	if(comp > (inputVectorSize - 1) ||(  vec > ( getComponentCount(pnInputFile, sizeof(float))/inputVectorSize - 1 )  )) {
 
 		/* ErrLog here */
 		exit(1);
 
 	}
 	/* Jump directly to the vec'th vector*/
-    fseek(fp, (sizeof(float) * intputVectorSize * vec), SEEK_SET);
+    fseek(pnInputFile, (sizeof(float) * inputVectorSize * vec), SEEK_SET);
 
 	/* Jump to the comp'th component of the vec'th vector */
-	fseek(fp, (comp * sizeof(float)), SEEK_CUR);
+	fseek(pnInputFile, (comp * sizeof(float)), SEEK_CUR);
 
 	/* Read the needed vector's component */
-	fread(&component, sizeof(float), 1, fp);
+	fread(&component, sizeof(float), 1, pnInputFile);
 
 	return component;
-
 }
+
+
 
 /**
  * Get vec'th vector's comp'th component.
@@ -183,13 +184,13 @@ float perceptron::getOutputVectorComponent(int vec, int comp)
 
 	}
 	/* Jump directly to the vec'th vector in the input file */
-    fseek(fp, (sizeof(float) * outputVectorSize * vec), SEEK_SET);
+    fseek(pnOutputFile, (sizeof(float) * outputVectorSize * vec), SEEK_SET);
 
 	/* Jump to the comp'th component of the vec'th vector */
-	fseek(fp, (comp * sizeof(float)), SEEK_CUR);
+	fseek(pnOutputFile, (comp * sizeof(float)), SEEK_CUR);
 
 	/* Read the needed vector's component */
-	fread(&component, sizeof(float), 1, fp);
+	fread(&component, sizeof(float), 1, pnOutputFile);
 
 	return component;
 
@@ -213,6 +214,7 @@ void perceptron::processData()
 	/**
 	 * Read written vectors from 0'th to the last one
 	 * (neuronCount - 1) because 3'rd argument indexes from 0
+	 * true because we want to output to STDOUT
 	 */
 	readVectorFromFile(pnOutputFile, 0, neuronCount - 1, true);
 
@@ -221,7 +223,7 @@ void perceptron::processData()
 /**
  * Simply writes given array to the file
  */
-bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1)
+bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n /*= -1*/)
 {
 	if(fp== NULL) {
 		/* Log error here */
@@ -235,7 +237,7 @@ bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1)
 	if(n == -1) n = getComponentCount(fp, sizeof(float));
 
 	for(int i = 0; i < n; i++) {
-		fwrite(arr[i], sizeof(float), 1, fp);
+		fwrite(&arr[i], sizeof(float), 1, fp);
 	}
 
 	/* Write everything without closing file */
@@ -286,9 +288,9 @@ vector<float> perceptron::readVectorFromFile(FILE *fp, int start, int end, bool 
 	if(print) {
 		cout << "{";
 		for(int i = 0; i < tmp.size(); i++) {
-			cout << tmp[i] << ", "
+			cout << tmp[i] << ", ";
 		}
-		cout << '\b\b' << "}"; //'\b' -- one position backwards
+		cout << "\b\b" << "}"; //'\b' -- one position backwards
 		cout<<"\n";
 	}
 
@@ -309,6 +311,12 @@ void perceptron::writeWeightsToFile()
 
 int perceptron::getComponentCount(FILE* fp, float component_size)
 {
+	/**
+	 * Check whether pointer is correct
+	 */
+	if(fp == NULL)
+		return -1;
+
 	int num, pos;
 	pos = ftell(fp); //save our old position in file 
 
