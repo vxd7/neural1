@@ -1,5 +1,5 @@
 #include "nnetwork.h"
-#define ISRAND true
+#define ISRAND false
 ofstream nnetworkErrLog("log.txt");
 
 neuralNetwork::neuralNetwork()
@@ -83,10 +83,11 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 
 	/* inputVectorSize -- the number of components in the input vector */
     fseek(fp, (sizeof(float) * inputVectorSize * k), SEEK_SET);
-
+	cout<<"input:\n";
     for(int i = 0; i < inputVectorSize; i++)
     {
         fread(&networkInput[i], sizeof(float), 1, fp);
+		cout<<networkInput[i]<<"\n";
     }
 
     fclose(fp);
@@ -287,4 +288,158 @@ int neuralNetwork::inputVectorNumber(FILE *fp)
 }
 
 /* Gradient descent learning algo */
+void neuralNetwork::learn(const char* fname, const char* fname_in, float tempo)
+{
+	FILE* fp, *fp_in;
+	if((fp = fopen(fname, "rb+")) == NULL)
+	{
+		nnetworkErrLog << "Error opening learning samples file!";
+		exit(1);
+	}
 
+	if((fp_in = fopen(fname_in, "rb+")) == NULL)
+	{
+		nnetworkErrLog << "Error input opening learning samples file!";
+		exit(1);
+	}
+
+	float** allLayerError = new float* [layersCount];
+	for(int i = 0; i < layersCount; i++)
+	{
+		allLayerError[i] = new float[neuronsInLayers[i]];
+		fill_n(allLayerError[i], neuronsInLayers[i], 0); //assign 0
+	}
+
+	/*get sample*/
+	int sampleVectorSize = neuronsInLayers[layersCount - 1];
+
+	int sampleVectorNumber;
+	fseek(fp, 0, SEEK_END);
+	sampleVectorNumber = ftell(fp)/(sampleVectorSize * sizeof(float));
+
+	float* sample = new float[sampleVectorSize];
+	
+
+	fseek(fp, 0, SEEK_SET);
+	fseek(fp_in, 0, SEEK_SET);
+	for(int i = 0; i < sampleVectorNumber; i++)
+	{
+		
+		getInput(fname_in, i);
+		scaleInput("SamplesInputsFile.bin",0.0,1.0);
+		processLayersData();
+		reverseScaleOutput("SamplesOutputsFile.bin",0.0,1.0);
+
+		for(int j = 0; j < sampleVectorSize; j++)
+		{
+			fread(&sample[j], sizeof(float), 1, fp);
+			//cout<<"sample:"<<sample[j]<<"\n";
+		}
+
+		lastLayerError(sample,allLayerError);
+
+		for(int k = (layersCount - 1) - 1; k >= 0; --k)
+		{
+			layerError(sample, allLayerError[k], k,allLayerError);
+		}
+
+	
+	
+	float delta = 0.0;
+	//for the last layer
+	int neuronsLastLayer = neuronsInLayers[layersCount - 1];
+	for(int j = 0; j < neuronsInLayers[layersCount - 1]; j++)
+	{
+		/* Weights of the last layer's j'th neuron */
+		for(int k = 1; k < networkLayers[layersCount - 1].neurons[j].inputsCount; k++)//no (inputsCount - 1) because otherwise we won't go through all weights
+		{
+			
+			delta = tempo * allLayerError[layersCount - 1][j] * 
+				(networkLayers[layersCount - 1].outputs[j] * (1 - networkLayers[layersCount - 1].outputs[j])) * 
+				networkLayers[layersCount - 2].outputs[k - 1];
+			
+			networkLayers[layersCount - 1].neurons[j].weights[k] -= delta;
+			
+				
+		}
+	}
+	
+
+	//for the layers in the middle
+	for(int layer_num = 1; layer_num < layersCount - 2; layer_num++)//layersCount - 2 because we don't wanna go through the last layer
+	{
+		for(int j = 0; j < neuronsInLayers[layer_num]; j++)
+		{
+			/* Weights of the i'th layer's j'th neuron */
+			for(int k = 1; k < networkLayers[layer_num].neurons[j].inputsCount; k++)//no (inputsCount - 1) because otherwise we won't go through all weights
+			{
+
+				delta = tempo * allLayerError[layer_num][j] * 
+					(networkLayers[layer_num].outputs[j] * (1 - networkLayers[layer_num].outputs[j])) * 
+					networkLayers[layer_num - 1].outputs[k - 1];
+				networkLayers[layer_num].neurons[j].weights[k] -= delta;
+				
+				
+			}
+		}
+	}
+
+	//For the zeroth layer:
+	for(int j = 0; j < neuronsInLayers[0]; j++)
+		{
+			/* Weights of the 0'th layer's j'th neuron */
+			for(int k = 1; k < networkLayers[0].neurons[j].inputsCount; k++)//no (inputsCount - 1) because otherwise we won't go through all weights
+			{
+				
+				delta = tempo * allLayerError[0][j] * 
+					(networkLayers[0].outputs[j] * (1 - networkLayers[0].outputs[j])) * 
+					networkInput[k - 1];
+				networkLayers[0].neurons[j].weights[k] -= delta;
+				
+				
+			}
+		}
+	}
+	writeWeightsToFiles();
+	
+
+//	fclose(fp);
+	//fclose(fp_in);
+
+	for(int i = 0; i < layersCount; i++)
+	{
+		delete[] allLayerError[i];
+	}
+	delete[] allLayerError;
+
+}
+
+void neuralNetwork::lastLayerError(float *sample,float **allLayerError)
+{
+	int neuronsLastLayer = neuronsInLayers[layersCount - 1];
+
+	for(int i = 0; i < neuronsLastLayer; i++)
+	{
+		allLayerError[layersCount - 1][i] = networkOutput[i] - sample[i];
+		cout<<"network-sample= "<<networkOutput[i]<<"-"<<sample[i]<<"="<<allLayerError[layersCount - 1][i]<<"\n\n";
+	}
+}
+
+																
+void neuralNetwork::layerError(float *sample, float* nextLayerError, int layerNumber, float** allLayerError)
+{
+	
+	int currLayerNeurons = neuronsInLayers[layerNumber]; /* Indexing from ZERO */ 
+
+	for(int i = 0; i < neuronsInLayers[layerNumber]; i++)
+	{ 
+		for(int j = 0; j < neuronsInLayers[layerNumber + 1]; j++)
+		{
+			//networkLayers[layerNumber + 1].neurons[j].weights[i];	
+			allLayerError[layerNumber][i] += allLayerError[layerNumber + 1][j] * 
+				(networkLayers[layerNumber + 1].outputs[j] * (1 - networkLayers[layerNumber + 1].outputs[j])) *
+				networkLayers[layerNumber + 1].neurons[j].weights[i + 1];
+			//cout << "\n layerError for layer: "<<layerNumber<<" is "<<allLayerError[layerNumber][i]<<"\n";
+		}
+	}
+}
