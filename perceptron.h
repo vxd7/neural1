@@ -26,11 +26,6 @@ private:
 	layer pnLayer;
 
 	/**
-	 * Whether we want to randomize our neurons
-	 */
-	bool randomize;
-
-	/**
 	 * The size of the input vector -- number of float components in it
 	 * Neurons in the layer must have this number of weights each
 	 */
@@ -69,6 +64,19 @@ private:
 	 */
 	FILE* pnBkpFile;
 
+	/* Flags and flag variables */
+
+	/**
+	 * Whether we want to randomize our neurons
+	 */
+	bool randomize;
+
+	/**
+	 * Are the files initialized yet?
+	 * true -- files are initialized. Flag is set by initFiles function.
+	 * false -- files are _not_ initialized. The default state of the flag.
+	 */
+	bool filesInitFlag;
 public:
 	vector<float> pnInput;
 	vector<float> pnOutput;
@@ -101,7 +109,11 @@ public:
 
 	/* The number of input vectors in file */
 	int getComponentCount(FILE* fp, float component_size);
+
 	void writeWeightsToFile();
+
+	void readWeightsFromFile();
+	void readWeightsFromFile(string newBkpFilename);
 	
 };
 

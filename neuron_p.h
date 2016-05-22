@@ -33,5 +33,6 @@ public:
 	float tfunc(float sighal); /**< Threshold finction */
 	void summate(vector<float> &input); /**< Summation function. Takes input vector as argument */
 
-	void writeWeights(FILE *fp); /**< Write weights to the file */
+	bool writeWeights(FILE *fp); /**< Write weights to the file */
+	bool readWeights(FILE *fp, int num);
 };

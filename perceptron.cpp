@@ -7,17 +7,30 @@ perceptron::perceptron(bool rnd /*= false*/)
 	 */
     srand (static_cast <unsigned> (time(0)));
 
+	/**
+	 * Init all the files pointers
+	 */
 	pnInputFile = NULL;
 	pnOutputFile = NULL;
 	pnBkpFile = NULL;
 
-	randomize = rnd;
-
+	/**
+	 * Init all the vectorCount vars
+	 */
 	inputVectorCount = 0;
 	outputVectorCount = 0;
 
+	/**
+	 * Init all the vectorSize vars
+	 */
 	inputVectorSize = 0;
 	outputVectorSize = 0;
+
+	/**
+	 * Init all the flags and flag variables
+	 */
+	randomize = rnd;
+	filesInitFlag = false;
 }
 
 perceptron::~perceptron()
@@ -51,6 +64,18 @@ bool perceptron::initNetwork()
 	/* Construct a layer */
 	pnLayer.initLayer(neuronCount, inputVectorSize);
 	randomize = true; /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
+
+	if(!filesInitFlag) {
+		string tmpInputFilename, tmpOutputFilename, tmpBkpFilename;
+
+		cout<<"Input files initialization information:\n";
+		cout<<"Input the name of input file: "; cin>>tmpInputFilename;
+		cout<<"Input the name of output file (optional): "; cin>>tmpOutputFilename;
+		cout<<"Input the name of backup file to store weights in (optional): "; cin>>tmpBkpFilename;
+
+		initFiles(tmpInputFilename, tmpOutputFilename, tmpBkpFilename);
+	}
+
 	pnLayer.constructNeurons(randomize);
 
 	return true;
@@ -58,6 +83,11 @@ bool perceptron::initNetwork()
 
 bool perceptron::initFiles(string inputFile, string outputFile /*= ""*/, string bkpFile /*= ""*/)
 {
+	/**
+	 * Set the flag -- files are considered initialized now 
+	 */
+	filesInitFlag = true;
+
 	inputFileName = inputFile;
 	outputFileName = outputFile;
 	bkpFileName = bkpFile;
@@ -85,10 +115,9 @@ bool perceptron::initFiles(string inputFile, string outputFile /*= ""*/, string 
 	if(bkpFileName != "") {
 
 		/**
-		 * Erase contents of the file if there is any.
 		 * Create when necessary
 		 */
-		if((pnBkpFile = fopen(bkpFileName.c_str(), "wb+")) == NULL) {
+		if((pnBkpFile = fopen(bkpFileName.c_str(), "ab+")) == NULL) {
 			/* Log error here */
 			exit(1);
 		}
@@ -303,11 +332,88 @@ void perceptron::writeWeightsToFile()
 
 	if(pnBkpFile == NULL) {
 		/* Log here */
+		cout<<"Backup file was not set properly!!\n";
 		exit(1);
 	}
 
-	for(int i = 0; i < neuronCount; i++) {
+	/**
+	 * Reopen file with "wb+" in order to erase any content there.
+	 */
+	if( (pnBkpFile = freopen(NULL, "wb+", pnBkpFile)) == NULL) {
+		/* Log error here */
+		cout<<"ERROR preparing file to store weights in!\n";
+		exit(1);
 	}
+
+	if( pnLayer.writeNeuronsToFile(pnBkpFile) ) {
+		/* Log success here */
+		cout<<"Successfully written weights\n";
+	}
+	else {
+		/* Log failure here */
+		cout<<"ERROR while writing weights to file\n";
+	}
+}
+
+void perceptron::readWeightsFromFile()
+{
+	if(pnBkpFile == NULL) {
+		/* Log failure here */
+		cout<<"ERROR Backup file was not set\n";
+		exit(1);
+	}
+
+	if( !pnLayer.readNeuronsFromFile(pnBkpFile) ) {
+		cout<<"ERROR while reading weights\n";
+		exit(1);
+	}
+
+	cout<<"Weights have been successfully read from file!\n";
+	
+}
+
+void perceptron::readWeightsFromFile(string newBkpFilename)
+{
+	bkpFileName	= newBkpFilename;
+
+	/**
+	 * If the file was _not_ openede previously
+	 * we need to open it first using supplied newBkpFilename
+	 * The file must exist -- user ensures it.
+	 */
+	if(pnBkpFile == NULL) {
+
+		if((pnBkpFile = fopen(bkpFileName.c_str(), "rb")) == NULL) {
+			/* Log error here */
+
+			cout<<"ERROR opening the file "<<bkpFileName;
+
+			exit(1);
+		}
+		
+	}
+	/**
+	 * If the file was actually opened previously (supposedly by initFiles)
+	 * we need to reopen this stream with another filename
+	 */
+	else {
+
+		/**
+		 * The file must exist -- "rb"
+		 */
+		if( (pnBkpFile = freopen(bkpFileName.c_str(), "rb", pnBkpFile)) == NULL) {
+			/* Log error here */
+			cout<<"ERROR preparing file to store weights in!\n";
+			exit(1);
+		}
+	}
+
+	/**
+	 * And call standart reading function when we are done with files
+	 */
+	readWeightsFromFile();
+	
+	
 }
 
 int perceptron::getComponentCount(FILE* fp, float component_size)

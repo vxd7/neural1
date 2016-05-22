@@ -64,13 +64,37 @@ void layer::computeOutput()
 
 bool layer::writeNeuronsToFile(FILE *fp)
 {
+	bool success = true;
+
 	for(int i = 0; i < numberOfNeurons; i++) { 
-	//	neurons[i].
+
+		if(!neurons[i].writeWeights(fp)) {
+			success = false;
+			break;
+		}
 	}
 
-	return true;
+	if(success)
+		return true;
+	else
+		return false;
+
 }
 bool layer::readNeuronsFromFile(FILE *fp)
 {
-	return true;
+	bool success = true;
+
+	for(int i = 0; i < numberOfNeurons; i++) { 
+		cout<<"Neuron ##"<<i<<":\n";
+		if( !neurons[i].readWeights(fp, i) ) {
+			success = false;
+			break;
+		}
+	}
+
+	if(success)
+		return true;
+	else
+		return false;
+
 }

@@ -81,13 +81,55 @@ void neuron::summate(vector<float> &input)
 
 }
 
-void neuron::writeWeights(FILE *fp)
+bool neuron::writeWeights(FILE *fp)
 {
+	bool success = true;
+	int check = 0;
+
     fseek(fp, 0, SEEK_END);
 
     for(int i = 0; i < inputsCount; i++)
     {
-        fwrite(&weights[i], sizeof(float), 1, fp);
+        check = fwrite(&weights[i], sizeof(float), 1, fp);
+		if(check != 1) {
+			success = false;
+			break;
+		}
     }
 
+	if(success)
+		return true;
+	else
+		return false;
+
+}
+
+/**
+ * Where num -- ordinary number of placeholder in the file pointed by *fp
+ */
+bool neuron::readWeights(FILE *fp, int num)
+{
+	bool success = true;
+	int check = 0;
+
+	/**
+	 * Jump to the start of this neuron's palceholder 
+	 * in *fp file
+	 */
+	fseek(fp, (sizeof(float) * inputsCount * num), SEEK_SET);
+
+	for(int i = 0; i < inputsCount; i++) {
+		check = fread(&weights[i], sizeof(float), 1, fp);
+		cout<<"Read weight "<<i<<": "<<weights[i]<<"\n";
+		if(check != 1) {
+			success = false;
+			break;
+		}
+	}
+
+	if(success)
+		return true;
+	else
+		return false;
+	
 }
