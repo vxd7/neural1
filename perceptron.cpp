@@ -50,6 +50,7 @@ bool perceptron::initNetwork()
 
 	/* Construct a layer */
 	pnLayer.initLayer(neuronCount, inputVectorSize);
+	randomize = true; /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 	pnLayer.constructNeurons(randomize);
 
 	return true;

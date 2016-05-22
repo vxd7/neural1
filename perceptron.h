@@ -90,9 +90,6 @@ public:
 	void getInput();
 	void getInput(int k); //from file
 
-	void scaleInput(int startInterval, int endInterval); //Preprocess input vector in order to fit inc
-	void reverseScaleOutput(int startInterval, int endInterval);
-
 	void processData();
 
 	bool writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1);
