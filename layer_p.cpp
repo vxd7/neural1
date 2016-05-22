@@ -54,10 +54,15 @@ void layer::constructNeurons(bool isRand, const char *fname /*= NULL*/)
 void layer::computeOutput()
 {
 	/* Log here */
+	cout<<"\n";
+	cout<<"LAYER: Started computing output...\n";
 
 	for(int i = 0; i < numberOfNeurons; i++) {
+		cout<<"Neuron #"<<i<<":\n";
 		neurons[i].summate(input);
 		output[i] = neurons[i].output;
+		cout<<"\n\nNeuron #"<<i<<": OUTPUT: "<<output[i]<<"\n";
+		
 	}
 
 }

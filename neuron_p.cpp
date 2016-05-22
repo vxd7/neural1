@@ -67,17 +67,29 @@ void neuron::summate(vector<float> &input)
 		exit(1);
 	}
 
+	cout<<"NEURON: Starting summate procedure...\n";
+
 	/* Sum up */
     for(int i = 0; i < inputsCount; i++)
     {
+		cout<<"NEURON: weight is: "<<weights[i]<<"\n";
+		cout<<"NEURON: input is: "<<input[i]<<"\n";
+
         signal += weights[i] * input[i];
+
+		cout<<"NEURON: +signal is: "<<signal<<"\n\n";
     }
+
+	cout<<"NEURON: resulting signal is: "<<signal<<"\n";
+	cout<<"NEURON: executing threshold function...\n";
 
 	/* And execute threshold function */
 	signal = tfunc(signal);
+	cout<<"NEURON: output is "<<signal<<"\n";
 
 	/* Store the result in the neuron */
 	output = signal;
+	cout<<"NEURON: LOG END"<<"\n";
 
 }
 

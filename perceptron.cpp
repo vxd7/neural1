@@ -152,6 +152,12 @@ void perceptron::getInput(int k)
 		exit(1);
 	}
 
+	if(inputVectorCount == 0) {
+		/* Log error */
+		cout<<"ERROR input file is empty!";
+		exit(1);
+	}
+
 	/**
 	 * Components of the input vector are indexed FROM 0.
 	 */
@@ -161,8 +167,10 @@ void perceptron::getInput(int k)
 
 	fseek(pnInputFile, sizeof(float) * inputVectorSize * k, SEEK_SET);
 
+	cout<<"+++Read vector from a file:+++\n";
 	for(int i = 0; i < inputVectorSize; i++) {
 		fread(&pnInput[i], sizeof(float), 1, pnInputFile);
+		cout<<"Vector "<<k<<" component "<<i<<": "<<pnInput[i]<<"\n";
 	}
 	
 }
@@ -233,12 +241,14 @@ void perceptron::processData()
 		pnLayer.input[i] = pnInput[i];
 	}
 
+	cout<<"Computing output...\n";
 	pnLayer.computeOutput();
 
 	for(int i = 0; i < neuronCount; i++) {
 		pnOutput[i] = pnLayer.output[i];
 	}
 
+	cout<<"Writing to the file...\n";
 	writeVectorToFile(pnOutputFile, pnOutput, neuronCount);
 
 	/**
@@ -246,7 +256,9 @@ void perceptron::processData()
 	 * (neuronCount - 1) because 3'rd argument indexes from 0
 	 * true because we want to output to STDOUT
 	 */
+	cout<<"\n-----Resulting output vector:-----\n";
 	readVectorFromFile(pnOutputFile, 0, neuronCount - 1, true);
+
 
 }
 
@@ -255,8 +267,10 @@ void perceptron::processData()
  */
 bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n /*= -1*/)
 {
-	if(fp== NULL) {
+	if(fp == NULL) {
 		/* Log error here */
+
+		cout<<"Invalid output file! Function writeVectorToFile\n";
 		exit(1);
 	}
 
@@ -264,14 +278,23 @@ bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n /*= -1*/)
 	
 	/* Log here*/ 
 
-	if(n == -1) n = getComponentCount(fp, sizeof(float));
+//	if(n == -1) n = getComponentCount(fp, sizeof(float));
 
-	for(int i = 0; i < n; i++) {
-		fwrite(&arr[i], sizeof(float), 1, fp);
+	cout<<arr.size()<<"\n";
+	int check = 0;
+	for(int i = 0; i < arr.size(); i++) {
+		cout<<"ARR["<<i<<"] is: "<<arr[i]<<"\n";
+		check = fwrite(&arr[i], sizeof(float), 1, fp);
+
+		if(check != 1) {
+			cout<<"ERROR writing arr["<<i<<"] to file!\n";
+			exit(1);
+			
+		}
 	}
 
 	/* Write everything without closing file */
-	fflush(fp);
+	if(fflush(fp) != 0) cout<<"ERROR writeVectorToFile\n";
 
 	return true;
 }
@@ -291,6 +314,7 @@ vector<float> perceptron::readVectorFromFile(FILE *fp, int start, int end, bool 
 
 	if(fp == NULL) {
 		/* Log here */
+		cout<<"Invalid file pointer to read from! Function readVectorFromFile\n";
 		exit(1);
 	}
 	
@@ -299,20 +323,29 @@ vector<float> perceptron::readVectorFromFile(FILE *fp, int start, int end, bool 
 	 */
 	if( (start < 0) || (end > getComponentCount(fp, sizeof(float)) * sizeof(float) - 1) ) {
 		/* Log here */
+
+		cout<<"ERROR: entered values are incorrect! Function readVectorFromFile\n";
 		exit(1);
 	}
 
-	if(end > start) {
+	if(end < start) {
 		/* Log here */
+
+		cout<<"ERROR1: entered values are incorrect! Function readVectorFromFile\n";
 		exit(1);
 	}
+	
+	fseek(fp, start * sizeof(float), SEEK_SET);
+		
 
 	/**
 	 * <=end because indexation is from 0 and we are reading vectors inclusively */
 	for(int i = start; i <= end; i++) {
 
 		fread(&comp, sizeof(float), 1, fp);
+		cout<<"Read component #"<<i<<" is: "<<comp<<"\n";
 		tmp.push_back(comp);
+
 	}
 
 	if(print) {
