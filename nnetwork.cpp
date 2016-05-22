@@ -83,11 +83,11 @@ void neuralNetwork::getInput(const char *fname, int k) //k - ordinary number of 
 
 	/* inputVectorSize -- the number of components in the input vector */
     fseek(fp, (sizeof(float) * inputVectorSize * k), SEEK_SET);
-	cout<<"input:\n";
+	cout<<"input: ";
     for(int i = 0; i < inputVectorSize; i++)
     {
         fread(&networkInput[i], sizeof(float), 1, fp);
-		cout<<networkInput[i]<<"\n";
+		cout<<networkInput[i]<<" ";
     }
 
     fclose(fp);
