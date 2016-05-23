@@ -114,6 +114,8 @@ public:
 
 	void readWeightsFromFile();
 	void readWeightsFromFile(string newBkpFilename);
+
 	
+	void learn_digits();
 };
 

@@ -390,13 +390,17 @@ void perceptron::writeWeightsToFile()
 
 void perceptron::readWeightsFromFile()
 {
+	bool success = true;
+
 	if(pnBkpFile == NULL) {
 		/* Log failure here */
 		cout<<"ERROR Backup file was not set\n";
 		exit(1);
 	}
 
-	if( !pnLayer.readNeuronsFromFile(pnBkpFile) ) {
+	success = pnLayer.readNeuronsFromFile(pnBkpFile); 
+
+	if(!success) {
 		cout<<"ERROR while reading weights\n";
 		exit(1);
 	}
@@ -466,4 +470,13 @@ int perceptron::getComponentCount(FILE* fp, float component_size)
 
 	return num;
 	
+}
+
+/* CAUTION!! CRAPPY CODE!
+ * TODO: Rewrite fukken everything in learn functions
+ */
+void perceptron::learn_digits()
+{
+	                 /*    0         1          2          3          4          5          6          7          8          9    */
+	int ans[10][4] = { {0,0,0,0}, {0,0,0,1}, {0,0,1,0}, {0,0,1,1}, {0,1,0,0}, {0,1,0,1}, {0,1,1,0}, {0,1,1,1}, {1,0,0,0}, {1,0,0,1}};
 }
