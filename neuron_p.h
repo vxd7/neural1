@@ -35,4 +35,9 @@ public:
 
 	bool writeWeights(FILE *fp); /**< Write weights to the file */
 	bool readWeights(FILE *fp, int num);
+
+	/* Learning: */
+
+	bool getWeight(int num, float *result);
+	bool changeWeights(vector<float> &newWeights);
 };

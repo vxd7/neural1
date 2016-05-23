@@ -145,3 +145,33 @@ bool neuron::readWeights(FILE *fp, int num)
 		return false;
 	
 }
+
+
+bool neuron::getWeight(int num, float *result)
+{
+	if(num > inputsCount) {
+		/* Log error */
+
+		cout<<"Error searching for neuron weight: no such weight: "<<num<<"\n";
+		return false;
+
+	}
+
+	*(result) = weights[num];
+}
+
+bool neuron::changeWeights(vector<float> &newWeights)
+{
+	if(newWeights.size() > inputsCount) {
+		/* Log failure */
+		cout<<"Incorrect new sizes.\n";
+
+		return false;
+	}
+
+	for(int i = 0; i < inputsCount; i++) {
+		weights[i] = newWeights[i];
+	}
+
+	return true;
+}

@@ -21,6 +21,9 @@ public:
 	bool writeNeuronsToFile(FILE *fp);
 	bool readNeuronsFromFile(FILE *fp);
 
+	bool getNeuronWeight(int neuronNumber, int weightNumber, float *result);
+	bool setNeuronWeights(int neuronNumber, vector<float> &newWeights);
+
 	
 };
 

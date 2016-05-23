@@ -103,3 +103,43 @@ bool layer::readNeuronsFromFile(FILE *fp)
 		return false;
 
 }
+
+bool layer::getNeuronWeight(int neuronNumber, int weightNumber, float *result)
+{
+	bool success = true;
+
+	if(neuronNumber > numberOfNeurons) {
+		/* Log error */
+		cout<<"Incorrect neuron number! Function getNeuronWeight\n";
+
+		return false;
+	}
+
+	success = neurons[neuronNumber].getWeight(weightNumber, result);
+
+	if(success)
+		return true;
+	else
+		return false;
+
+}
+
+bool layer::setNeuronWeights(int neuronNumber, vector<float> &newWeights)
+{
+	bool success = true;
+
+	if(neuronNumber > numberOfNeurons) {
+		/* Log error */
+		cout<<"Incorrect neuron number! Function setNeuronWeights\n";
+
+		return false;
+	}
+
+	success = neurons[neuronNumber].changeWeights(newWeights);
+
+	if(success)
+		return true;
+	else
+		return false;
+
+}
