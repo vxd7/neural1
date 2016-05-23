@@ -16,6 +16,12 @@
  * 3. Each input/ouput file has fixed number of input/output vectors;
  * 4. The output vector's number of components matches to the number of neurons in the layer
  * 5. Components in the file are indexed from 0;
+ *
+ * Delta rule learning algo:
+ * 1. For single-laayer perceptron the delta leaning rule is used
+ * 2. Input vectors are readd and output  vectors are formed
+ * 3. The output vectors ther are compared with the ideal output vectors
+ * 4. The difference is calculated and delta rule function is then executed
  */
 class perceptron
 {
@@ -25,7 +31,7 @@ private:
 	 */
 	layer pnLayer;
 
-	/**
+	/** 
 	 * The size of the input vector -- number of float components in it
 	 * Neurons in the layer must have this number of weights each
 	 */
@@ -101,7 +107,7 @@ public:
 	void processData();
 
 	bool writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1);
-	vector<float> readVectorFromFile(FILE *fp, int start, int end, bool print);
+	vector<float> readVectorFromFile(FILE *fp, int start, size_t vectorSize, bool print);
 
 
 	float getInputVectorComponent(int vec, int comp);
@@ -116,6 +122,12 @@ public:
 	void readWeightsFromFile(string newBkpFilename);
 
 	
-	void learn_digits();
+	/**
+	 * Perceptron learning function -- learn on first `range' vectors
+	 * Learning samples are read from standart input file, then processed to the standart output file
+	 * Results then are compared with the ones in idealOutputFile file
+	 * Delta rule is executed
+	 */ 
+	void learn_digits(string idealOutputFile, int range, float n);
 };
 

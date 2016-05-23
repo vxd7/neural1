@@ -76,6 +76,10 @@ bool perceptron::initNetwork()
 		initFiles(tmpInputFilename, tmpOutputFilename, tmpBkpFilename);
 	}
 
+	cout<<"inputVectorSize: "<<inputVectorSize<<"\n";
+	inputVectorCount = getComponentCount(pnInputFile, sizeof(float))/inputVectorSize;
+	outputVectorCount = getComponentCount(pnOutputFile, sizeof(float))/outputVectorSize;
+
 	pnLayer.constructNeurons(randomize);
 
 	return true;
@@ -127,8 +131,6 @@ bool perceptron::initFiles(string inputFile, string outputFile /*= ""*/, string 
 	/**
 	 * Get the number of vectors in the given files
 	 */
-	inputVectorCount = getComponentCount(pnInputFile, sizeof(float))/inputVectorSize;
-	outputVectorCount = getComponentCount(pnOutputFile, sizeof(float))/outputVectorSize;
 
 	return true;
 }
@@ -252,12 +254,18 @@ void perceptron::processData()
 	writeVectorToFile(pnOutputFile, pnOutput, neuronCount);
 
 	/**
+	 * And change the outputVectorCount variable
+	 * because we have written something to the output file by now
+	 */
+	cout<<"outputVectorSize: "<<outputVectorSize<<"\n";
+	outputVectorCount = getComponentCount(pnOutputFile, sizeof(float))/outputVectorSize;
+
+	/**
 	 * Read written vectors from 0'th to the last one
-	 * (neuronCount - 1) because 3'rd argument indexes from 0
 	 * true because we want to output to STDOUT
 	 */
 	cout<<"\n-----Resulting output vector:-----\n";
-	readVectorFromFile(pnOutputFile, 0, neuronCount - 1, true);
+	readVectorFromFile(pnOutputFile, 0, sizeof(float) * outputVectorSize, true);
 
 
 }
@@ -300,17 +308,18 @@ bool perceptron::writeVectorToFile(FILE *fp, vector<float> &arr, int n /*= -1*/)
 }
 
 /**
- * Read vectors from file starting with number `start' and ending with number `end' INCLUSIVE
+ * Read vectors from file starting with number `start' and ending with number `end' INCLUSIVELY
  * fp -- pointer to the file to read from ;
  * start -- starting vector, indexes from 0 ;
- * end -- ending vector, indexes from 0 ;
+ * vectorSize -- total number of (FLOAT) components in the vector in bytes
  * print -- whether we want to print everything to STDOUT.
  */
-vector<float> perceptron::readVectorFromFile(FILE *fp, int start, int end, bool print)
+vector<float> perceptron::readVectorFromFile(FILE *fp, int start, size_t vectorSize, bool print)
 {
 
 	vector<float> tmp;
 	float comp;
+	int componentCount = vectorSize/sizeof(float);
 
 	if(fp == NULL) {
 		/* Log here */
@@ -321,26 +330,19 @@ vector<float> perceptron::readVectorFromFile(FILE *fp, int start, int end, bool 
 	/**
 	 * Check if everything is correct
 	 */
-	if( (start < 0) || (end > getComponentCount(fp, sizeof(float)) * sizeof(float) - 1) ) {
+	if(start < 0) {
 		/* Log here */
 
 		cout<<"ERROR: entered values are incorrect! Function readVectorFromFile\n";
 		exit(1);
 	}
 
-	if(end < start) {
-		/* Log here */
-
-		cout<<"ERROR1: entered values are incorrect! Function readVectorFromFile\n";
-		exit(1);
-	}
+	/* One more chacking is needed -- whether we are reading inexistend data */
 	
-	fseek(fp, start * sizeof(float), SEEK_SET);
+	fseek(fp, vectorSize * start, SEEK_SET);
 		
 
-	/**
-	 * <=end because indexation is from 0 and we are reading vectors inclusively */
-	for(int i = start; i <= end; i++) {
+	for(int i = 0; i < componentCount; i++) {
 
 		fread(&comp, sizeof(float), 1, fp);
 		cout<<"Read component #"<<i<<" is: "<<comp<<"\n";
@@ -475,8 +477,131 @@ int perceptron::getComponentCount(FILE* fp, float component_size)
 /* CAUTION!! CRAPPY CODE!
  * TODO: Rewrite fukken everything in learn functions
  */
-void perceptron::learn_digits()
+/**
+ * range -- the total number of vectors to read from the start of the file
+ * n -- the velocity of learning
+ */
+void perceptron::learn_digits(string idealOutput, int range, float n)
 {
 	                 /*    0         1          2          3          4          5          6          7          8          9    */
 	int ans[10][4] = { {0,0,0,0}, {0,0,0,1}, {0,0,1,0}, {0,0,1,1}, {0,1,0,0}, {0,1,0,1}, {0,1,1,0}, {0,1,1,1}, {1,0,0,0}, {1,0,0,1}};
+
+	FILE *idealOutputFile;
+	/**
+	 * ideal output Vector Count
+	 * The number of vectors in the idealOutput file
+	 */
+	int iVectorCount;
+
+	/**
+	 * ideal Output Component Count
+	 * The number of components (FLOAT) in the idealOutput file
+	 */
+	int iComponentCount;
+
+	/**
+	 * delta = T - OUT
+	 * T -- ideal output
+	 * OUT -- perceptron output
+	 */
+	float delta;
+
+	if( (idealOutputFile = fopen(idealOutput.c_str(), "rb")) == NULL) {
+		/* Log error here -- critical failure */
+
+		cout<<"Error reading ideal learning output vectors!\n";
+		exit(1);
+	}
+
+	iComponentCount = getComponentCount(idealOutputFile, sizeof(float));
+
+	/**
+	 * The number of output components in learning vectors _must_ be 
+	 * equal to the number of output components in the output file vectors
+	 */
+	iVectorCount = iComponentCount/outputVectorSize;
+
+	cout<<"iVectorCount: "<<iVectorCount<<"\n";
+	cout<<"outputVectorCount: "<<outputVectorCount<<"\n";
+	cout<<"inputVectorCount: "<<inputVectorCount<<"\n";
+
+	if((range > iVectorCount) || (range > outputVectorCount) || (range > inputVectorCount)) {
+		/* Log failure here */
+
+		cout<<"Incorrect range parameter! Function learn_digits(...)";
+		exit(1);
+	}
+
+	if(pnInputFile == NULL) {
+		/* Log failure */
+		cout<<"Cannot access input learning samples\n";
+		exit(1);
+	}
+	
+	float oldWeight;;
+
+	vector<float> idealOut;
+	float realOutComp;
+	float inputVectorComp;
+
+	float weightChange;
+
+	cout<<"\n+_+_+_+_+_+_STARTING LEARNING ALGO:_+_+_+_+_+_+_+\n";
+
+	/* For every output vector... */
+	for(int  i = 0; i < range; i++) {
+		cout<<"Output vector number: "<<i<<"\n";
+
+		cout<<"Reading ideal output file...\n";
+		idealOut = readVectorFromFile(idealOutputFile, i, sizeof(float) * outputVectorSize, false);
+
+		/* go through it's components */
+		for(int j = 0; j < outputVectorSize; j++) {
+			cout<<"Output vector component(NEURON No): "<<j<<"\n";
+			vector<float> newWeights;
+
+			realOutComp = getOutputVectorComponent(i, j);
+			delta = idealOut[j] - realOutComp;
+
+			/* Every component of output vector is one neuron.
+			 * Go through the weights of this j'th neuron */
+			for(int k = 0; k < inputVectorSize; k++) {
+				cout<<"NEURON: "<<j<<": COMP: "<<k<<"\n";
+
+				if(delta == 0) {
+					cout<<"Neuron is stable. \n";
+					break;
+				}
+				/**
+				 * j'th output component -- j'th neuron
+				 */
+
+				/**
+				 * For i'th input vector get it's k'th component
+				 * k -- ordinary number of neuron's current weight
+				 */
+				inputVectorComp = getInputVectorComponent(i, k);
+				cout<<"inputVectorComp: "<<inputVectorComp<<"\n";
+				pnLayer.getNeuronWeight(j, k, &oldWeight);
+				weightChange = oldWeight + n * delta * inputVectorComp;
+
+				cout<<"WEIGHT CHANGE: "<<weightChange<<"\n";
+
+				/**
+				 * Accumulate every weight's change -- write it to the vector
+				 */
+				newWeights.push_back(weightChange);
+			}
+
+			/**
+			 * And finally store weights in the neuron
+			 */
+			if(delta != 0) {
+				pnLayer.setNeuronWeights(j, newWeights);
+				cout<<"WRITTEN\n";
+			}
+		}
+	}
+
+	fclose(idealOutputFile);
 }

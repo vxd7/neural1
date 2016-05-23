@@ -8,11 +8,15 @@ int main()
 
 	myNet.initNetwork();
 
-	//myNet.writeWeightsToFile();
-	myNet.readWeightsFromFile();
-	myNet.getInput(0);
+	myNet.writeWeightsToFile();
+	//myNet.readWeightsFromFile();
+	for(int i = 0; i < 10; i++) {
+		myNet.getInput(i);
+		myNet.processData();
+		
+	}
 
-	myNet.processData();
+	myNet.learn_digits("iOut.bin", 9, 0.5);
 
 	return 0;
 	
