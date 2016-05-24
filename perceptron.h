@@ -1,5 +1,6 @@
 #pragma once
 #include "layer_p.h"
+#include <map>
 
 /**
  * Perceptron overall:
@@ -104,7 +105,11 @@ public:
 	void getInput();
 	void getInput(int k); //from file
 
-	void processData();
+	/**
+	 * bool write -- whether we want to write output data to the file
+	 * If false, the data is printed to the STDOUT
+	 */
+	void processData(bool write = true);
 
 	bool writeVectorToFile(FILE *fp, vector<float> &arr, int n = -1);
 	vector<float> readVectorFromFile(FILE *fp, int start, size_t vectorSize, bool print);
@@ -121,6 +126,8 @@ public:
 	void readWeightsFromFile();
 	void readWeightsFromFile(string newBkpFilename);
 
+	void printVectorsFromFile(FILE *fp, int fileVectorCount, int fileVectorCompCount);
+	void printVectorsFromFile(string pnFileType);
 	
 	/**
 	 * Perceptron learning function -- learn on first `range' vectors
@@ -129,5 +136,7 @@ public:
 	 * Delta rule is executed
 	 */ 
 	void learn_digits(string idealOutputFile, int range, float n);
+
+	void eraseOutputFile();
 };
 

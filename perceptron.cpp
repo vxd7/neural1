@@ -236,7 +236,7 @@ float perceptron::getOutputVectorComponent(int vec, int comp)
 
 }
 
-void perceptron::processData()
+void perceptron::processData(bool write /* = true */)
 {
 	
 	for(int i = 0; i < inputVectorSize; i++) { 
@@ -261,11 +261,11 @@ void perceptron::processData()
 	outputVectorCount = getComponentCount(pnOutputFile, sizeof(float))/outputVectorSize;
 
 	/**
-	 * Read written vectors from 0'th to the last one
+	 * Read written vector -- it starts with the (outputVectorCount - 1)'th vector
 	 * true because we want to output to STDOUT
 	 */
 	cout<<"\n-----Resulting output vector:-----\n";
-	readVectorFromFile(pnOutputFile, 0, sizeof(float) * outputVectorSize, true);
+	readVectorFromFile(pnOutputFile, outputVectorCount - 1, sizeof(float) * outputVectorSize, true);
 
 
 }
@@ -474,6 +474,70 @@ int perceptron::getComponentCount(FILE* fp, float component_size)
 	
 }
 
+void perceptron::printVectorsFromFile(string pnFileType)
+{
+
+	FILE *fp;
+
+	int fileVectorCount;
+	int fileVectorCompCount;
+
+	map<string, int> typeMap; 
+
+	typeMap["input"] = 1;
+	typeMap["output"] = 2;
+	typeMap["bkp"] = 3;
+						
+	switch(typeMap[pnFileType]) {
+		case 1:
+			fp = pnInputFile; 
+
+			fileVectorCount = inputVectorCount;
+			fileVectorCompCount = inputVectorSize;
+
+			break;
+		case 2:
+			fp = pnOutputFile; 
+
+			fileVectorCount = outputVectorCount;
+			fileVectorCompCount = outputVectorSize;
+
+			break;
+		case 3:
+			fp = pnBkpFile; 
+
+			fileVectorCount = neuronCount;
+			fileVectorCompCount = inputVectorSize;
+
+			break;
+		default:
+			cout<<"Error: no such file type!\n";
+			return;
+			break;
+	}
+
+	printVectorsFromFile(fp, fileVectorCount, fileVectorCompCount);
+	
+}
+void perceptron::printVectorsFromFile(FILE *fp, int fileVectorCount, int fileVectorCompCount)
+{
+	fseek(fp, 0, SEEK_SET);
+
+	for(int i = 0; i < fileVectorCount; i++) {
+
+		fseek(fp, i * fileVectorCompCount * sizeof(float), SEEK_SET);
+		cout<<"Vector #"<<i<<": {";
+
+		for(int j = 0; j < fileVectorCompCount; j++) {
+			float comp;
+			fread(&comp, sizeof(float), 1, fp);
+			cout<<comp<<", ";
+		}
+		cout<<"\b\b}\n";
+	
+	}
+}
+
 /* CAUTION!! CRAPPY CODE!
  * TODO: Rewrite fukken everything in learn functions
  */
@@ -520,6 +584,9 @@ void perceptron::learn_digits(string idealOutput, int range, float n)
 	 * equal to the number of output components in the output file vectors
 	 */
 	iVectorCount = iComponentCount/outputVectorSize;
+
+	cout<<"iComponentCount: "<<iComponentCount<<"\n";
+	cout<<"outputVectorSize: "<<outputVectorSize<<"\n";
 
 	cout<<"iVectorCount: "<<iVectorCount<<"\n";
 	cout<<"outputVectorCount: "<<outputVectorCount<<"\n";
@@ -582,6 +649,7 @@ void perceptron::learn_digits(string idealOutput, int range, float n)
 				 */
 				inputVectorComp = getInputVectorComponent(i, k);
 				cout<<"inputVectorComp: "<<inputVectorComp<<"\n";
+
 				pnLayer.getNeuronWeight(j, k, &oldWeight);
 				weightChange = oldWeight + n * delta * inputVectorComp;
 
@@ -604,4 +672,9 @@ void perceptron::learn_digits(string idealOutput, int range, float n)
 	}
 
 	fclose(idealOutputFile);
+}
+
+void perceptron::eraseOutputFile()
+{
+	pnOutputFile = freopen(NULL, "wb+", pnOutputFile);
 }
