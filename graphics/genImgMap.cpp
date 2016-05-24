@@ -53,12 +53,12 @@ int main(int argc, char *argv[])
 	vector<float> out_vec;
 	int m = 0; /* Counter for the vector */
 
-	sx = 3, sy = 4;
+	sx = 6, sy = 4;
 
 	out_vec.resize(sx * sy);
 
 	BMP bkg;
-	bkg.ReadFromFile(argv[1]);
+	if(!bkg.ReadFromFile(argv[1])) return 1;
 	width = bkg.TellWidth();
 	height = bkg.TellHeight();
 
@@ -101,8 +101,8 @@ int main(int argc, char *argv[])
 	cout<<"BLACK_COEFF IS: "<<black_coeff<<"\n";
 
 
-	for(int i = 0, fi = (width/sx); i < width; i += (width/sx), fi += (width/sx)) {
-		for(int j = 0, fj = (height/sy); j < height; j += (height/sy), fj += (height/sy)) {
+	for(int i = 0, fi = (width/sx); i <= width, fi <= width; i += (width/sx), fi += (width/sx)) {
+		for(int j = 0, fj = (height/sy); j <= height, fj <= height; j += (height/sy), fj += (height/sy)) {
 /*				int st_x, fin_x, st_y, fin_y;
 
 			st_x = (int)(width/sx) * i;
