@@ -1,0 +1,1 @@
+g++ -std=c++11 -g -o p main_p.cpp neuron_p.cpp layer_p.cpp perceptron.cpp
