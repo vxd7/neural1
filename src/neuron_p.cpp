@@ -10,6 +10,15 @@ neuron::neuron(bool rand /*= false*/)
 
 	/* Reset the output */
 	output = 0.0;
+
+	/* Set logging */
+	
+	//neuronLogFile = mkLogFname("neuron", ".log", true);
+	//neuronLog.setLoggingProfile("NEURON");
+	//neuronLog.setLoggingLevel(INFO);
+	//neuronLog.setColorLogging(true);
+
+	//neuronLog << "Completed initialization!";
 }
 
 neuron::neuron()
@@ -60,6 +69,11 @@ float neuron::tfunc(float signal)
 void neuron::summate(vector<float> &input)
 {
     float signal = 0.0;
+
+	cout << "IC:";
+	cout << inputsCount << endl;
+	//cout << input.size() << " " << inputsCount << endl;
+	//cout << weights.size() << endl;
 
 	/* Check whether input vector has the right size */
 	if(input.size() != weights.size()) {

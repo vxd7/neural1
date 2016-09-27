@@ -1,4 +1,11 @@
 #pragma once
+
+#define NET_DEBUG 0
+
+#ifdef GLOBAL_DEBUG
+#define NET_DEBUG 1
+#endif
+
 #include "layer_p.h"
 #include <map>
 
@@ -28,9 +35,14 @@ class perceptron
 {
 private:
 	/**
+	 * The number of layers
+	 */
+	int layerCount;
+
+	/**
 	 * A single layer of the perceptron
 	 */
-	layer pnLayer;
+	layer *networkLayers;
 
 	/** 
 	 * The size of the input vector -- number of float components in it
@@ -47,10 +59,10 @@ private:
 	int outputVectorCount;
 
 	/**
-	 * The number of neurons in the pnLayer layer.
+	 * The number of neurons in the layers.
 	 * Number of neurons MAY NOT be equal to the size of the input vector
 	 */
-	int neuronCount;
+	vector <int> neuronInLayer;
 
 	/**
 	 * =====FILE DESCRIPTORS:=====
@@ -99,7 +111,7 @@ public:
 	perceptron(bool rnd = false);
 	~perceptron();
 
-	bool initNetwork();
+	bool initNetwork(int layerCount, vector <int> layers);
 	bool initFiles(string inputFile, string outputFile = "", string bkpFile = "");
 
 	void getInput();
@@ -124,19 +136,11 @@ public:
 	void writeWeightsToFile();
 
 	void readWeightsFromFile();
-	void readWeightsFromFile(string newBkpFilename);
+	//void readWeightsFromFile(string newBkpFilename);
 
 	void printVectorsFromFile(FILE *fp, int fileVectorCount, int fileVectorCompCount);
 	void printVectorsFromFile(string pnFileType);
 	
-	/**
-	 * Perceptron learning function -- learn on first `range' vectors
-	 * Learning samples are read from standart input file, then processed to the standart output file
-	 * Results then are compared with the ones in idealOutputFile file
-	 * Delta rule is executed
-	 */ 
-	void learn_digits(string idealOutputFile, int range, float n);
-
 	void eraseOutputFile();
 };
 

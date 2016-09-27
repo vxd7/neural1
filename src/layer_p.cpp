@@ -57,6 +57,8 @@ void layer::computeOutput()
 	cout<<"\n";
 	cout<<"LAYER: Started computing output...\n";
 
+	cout << inputVectorSize;
+
 	for(int i = 0; i < numberOfNeurons; i++) {
 		cout<<"Neuron #"<<i<<":\n";
 		neurons[i].summate(input);
@@ -142,4 +144,18 @@ bool layer::setNeuronWeights(int neuronNumber, vector<float> &newWeights)
 	else
 		return false;
 
+}
+
+void layer::getInput(vector <float> layerInput)
+{
+	if(layerInput.size() != inputVectorSize) {
+		cout << "ERROR in getInput. Mismatching sizes" << endl;
+	}
+
+	input = layerInput;
+}
+
+vector<float> layer::getOutput()
+{
+	return output;
 }

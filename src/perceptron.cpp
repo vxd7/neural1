@@ -2,6 +2,7 @@
 
 perceptron::perceptron(bool rnd /*= false*/)
 {
+	networkLayers = NULL;
 	/**
 	 * Generate the seed for the weights randomiation
 	 */
@@ -13,6 +14,8 @@ perceptron::perceptron(bool rnd /*= false*/)
 	pnInputFile = NULL;
 	pnOutputFile = NULL;
 	pnBkpFile = NULL;
+
+	layerCount = 0;
 
 	/**
 	 * Init all the vectorCount vars
@@ -46,25 +49,41 @@ perceptron::~perceptron()
 	
 }
 
-bool perceptron::initNetwork()
+bool perceptron::initNetwork(int newLayerCount, vector <int> layers)
 {
+	/**
+	 * Initialize the number of layers
+	 */
+	layerCount = newLayerCount;
+	networkLayers = new layer[layerCount];
+
+	/**
+	 * Initialize the neurons in layer array
+	 */
+	neuronInLayer = layers;
 	
 	cout<<"Input the number of components in the input vector\n"; cin>>inputVectorSize;
 	pnInput.resize(inputVectorSize);
 
-	cout<<"Number of neurons\n"; cin >> neuronCount;
-	pnOutput.resize(neuronCount);
-
-	/*
-	 * Number of components in the output vector equals to the 
-	 * number of neurons in the layer
+	/**
+	 * Layers are indexed from ZERO
 	 */
-	outputVectorSize = neuronCount;
+	outputVectorSize = layers[layerCount - 1];
+	pnOutput.resize(outputVectorSize);
 
-	/* Construct a layer */
-	pnLayer.initLayer(neuronCount, inputVectorSize);
+	/* Construct layers */
 	randomize = true; /* !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!*/
 
+	networkLayers[0].initLayer(neuronInLayer[0], inputVectorSize);
+	networkLayers[0].constructNeurons(randomize);
+	for(int i = 1; i < layerCount; i++) {
+		networkLayers[i].initLayer(neuronInLayer[i], neuronInLayer[i - 1]);
+		networkLayers[i].constructNeurons(randomize);
+	}
+
+	/**
+	 * Get file names
+	 */
 	if(!filesInitFlag) {
 		string tmpInputFilename, tmpOutputFilename, tmpBkpFilename;
 
@@ -79,8 +98,6 @@ bool perceptron::initNetwork()
 	cout<<"inputVectorSize: "<<inputVectorSize<<"\n";
 	inputVectorCount = getComponentCount(pnInputFile, sizeof(float))/inputVectorSize;
 	outputVectorCount = getComponentCount(pnOutputFile, sizeof(float))/outputVectorSize;
-
-	pnLayer.constructNeurons(randomize);
 
 	return true;
 }
@@ -137,6 +154,12 @@ bool perceptron::initFiles(string inputFile, string outputFile /*= ""*/, string 
 
 void perceptron::getInput()
 {
+	for(int i = 0; i < inputVectorSize; i++) {
+		cout << i << "'th component: ";
+		cin >> pnInput[i];
+	}
+	cout << "All done!" << endl;
+
 }
 
 /**
@@ -239,19 +262,22 @@ float perceptron::getOutputVectorComponent(int vec, int comp)
 void perceptron::processData(bool write /* = true */)
 {
 	
-	for(int i = 0; i < inputVectorSize; i++) { 
-		pnLayer.input[i] = pnInput[i];
-	}
-
 	cout<<"Computing output...\n";
-	pnLayer.computeOutput();
 
-	for(int i = 0; i < neuronCount; i++) {
-		pnOutput[i] = pnLayer.output[i];
+	cout << "----------LAYER 0 ----------" << endl;
+	networkLayers[0].getInput(pnInput);
+	networkLayers[0].computeOutput();
+
+	for(int i = 1; i < layerCount; i++) {
+		cout << "----------LAYER " << i << "----------" << endl;
+		networkLayers[i].getInput(networkLayers[i - 1].getOutput());
+		networkLayers[i].computeOutput();
 	}
+
+	pnOutput = networkLayers[layerCount - 1].getOutput();
 
 	cout<<"Writing to the file...\n";
-	writeVectorToFile(pnOutputFile, pnOutput, neuronCount);
+	writeVectorToFile(pnOutputFile, pnOutput);
 
 	/**
 	 * And change the outputVectorCount variable
@@ -365,28 +391,34 @@ vector<float> perceptron::readVectorFromFile(FILE *fp, int start, size_t vectorS
 void perceptron::writeWeightsToFile()
 {
 
-	if(pnBkpFile == NULL) {
-		/* Log here */
-		cout<<"Backup file was not set properly!!\n";
-		exit(1);
-	}
+	//Set up multiple hard coded bkp files for multilayer
+	//
+	//
+	//if(pnBkpFile == NULL) {
+	//	/* Log here */
+	//	cout<<"Backup file was not set properly!!\n";
+	//	exit(1);
+	//}
+	
+	string bkpFileNameAlias("layer");
 
-	/**
-	 * Reopen file with "wb+" in order to erase any content there.
-	 */
-	if( (pnBkpFile = freopen(NULL, "wb+", pnBkpFile)) == NULL) {
-		/* Log error here */
-		cout<<"ERROR preparing file to store weights in!\n";
-		exit(1);
-	}
+	FILE *pnBkpLayerFile = NULL;
+	for(int i = 0; i < layerCount; i++) {
+		string tmpFileName = bkpFileNameAlias + to_string(i);
 
-	if( pnLayer.writeNeuronsToFile(pnBkpFile) ) {
-		/* Log success here */
-		cout<<"Successfully written weights\n";
-	}
-	else {
-		/* Log failure here */
-		cout<<"ERROR while writing weights to file\n";
+		if( (pnBkpLayerFile = fopen( tmpFileName.c_str(), "wb+")) == NULL) {
+			cout << "ERROR opening file " << tmpFileName << endl;
+		}
+
+		if( networkLayers[i].writeNeuronsToFile(pnBkpLayerFile) ) {
+			/* Log success here */
+			cout<<"Successfully written weights: " << tmpFileName << endl;
+		} else {
+			/* Log failure here */
+			cout<<"ERROR while writing weights to file" << tmpFileName << endl;
+		}
+
+		fclose(pnBkpLayerFile);
 	}
 }
 
@@ -394,66 +426,81 @@ void perceptron::readWeightsFromFile()
 {
 	bool success = true;
 
-	if(pnBkpFile == NULL) {
-		/* Log failure here */
-		cout<<"ERROR Backup file was not set\n";
-		exit(1);
-	}
+	//if(pnBkpFile == NULL) {
+	//	/* Log failure here */
+	//	cout<<"ERROR Backup file was not set\n";
+	//	exit(1);
+	//}
+	
+	string bkpFileNameAlias("layer");
 
-	success = pnLayer.readNeuronsFromFile(pnBkpFile); 
+	FILE *pnBkpLayerFile = NULL;
+	for(int i = 0; i < layerCount; i++) {
+		string tmpFileName = bkpFileNameAlias + to_string(i);
 
-	if(!success) {
-		cout<<"ERROR while reading weights\n";
-		exit(1);
+		if( (pnBkpLayerFile = fopen( tmpFileName.c_str(), "rb")) == NULL) {
+			cout << "ERROR opening file " << tmpFileName << endl;
+		}
+
+		success = networkLayers[i].readNeuronsFromFile(pnBkpLayerFile);
+
+		if(!success) {
+			cout<<"ERROR while reading weights\n";
+			break;
+		}
+
+		fclose(pnBkpLayerFile);
 	}
 
 	cout<<"Weights have been successfully read from file!\n";
 	
 }
 
-void perceptron::readWeightsFromFile(string newBkpFilename)
-{
-	bkpFileName	= newBkpFilename;
-
-	/**
-	 * If the file was _not_ openede previously
-	 * we need to open it first using supplied newBkpFilename
-	 * The file must exist -- user ensures it.
-	 */
-	if(pnBkpFile == NULL) {
-
-		if((pnBkpFile = fopen(bkpFileName.c_str(), "rb")) == NULL) {
-			/* Log error here */
-
-			cout<<"ERROR opening the file "<<bkpFileName;
-
-			exit(1);
-		}
-		
-	}
-	/**
-	 * If the file was actually opened previously (supposedly by initFiles)
-	 * we need to reopen this stream with another filename
-	 */
-	else {
-
-		/**
-		 * The file must exist -- "rb"
-		 */
-		if( (pnBkpFile = freopen(bkpFileName.c_str(), "rb", pnBkpFile)) == NULL) {
-			/* Log error here */
-			cout<<"ERROR preparing file to store weights in!\n";
-			exit(1);
-		}
-	}
-
-	/**
-	 * And call standart reading function when we are done with files
-	 */
-	readWeightsFromFile();
-	
-	
-}
+// IS NOT NEEDED FOR MULTILAYER FOR NOW
+// TODO: REWRITE LATER
+//void perceptron::readWeightsFromFile(string newBkpFilename)
+//{
+//	bkpFileName	= newBkpFilename;
+//
+//	/**
+//	 * If the file was _not_ openede previously
+//	 * we need to open it first using supplied newBkpFilename
+//	 * The file must exist -- user ensures it.
+//	 */
+//	if(pnBkpFile == NULL) {
+//
+//		if((pnBkpFile = fopen(bkpFileName.c_str(), "rb")) == NULL) {
+//			/* Log error here */
+//
+//			cout<<"ERROR opening the file "<<bkpFileName;
+//
+//			exit(1);
+//		}
+//		
+//	}
+//	/**
+//	 * If the file was actually opened previously (supposedly by initFiles)
+//	 * we need to reopen this stream with another filename
+//	 */
+//	else {
+//
+//		/**
+//		 * The file must exist -- "rb"
+//		 */
+//		if( (pnBkpFile = freopen(bkpFileName.c_str(), "rb", pnBkpFile)) == NULL) {
+//			/* Log error here */
+//			cout<<"ERROR preparing file to store weights in!\n";
+//			exit(1);
+//		}
+//	}
+//
+//	/**
+//	 * And call standart reading function when we are done with files
+//	 */
+//	readWeightsFromFile();
+//	
+//	
+//}
 
 int perceptron::getComponentCount(FILE* fp, float component_size)
 {
@@ -504,9 +551,10 @@ void perceptron::printVectorsFromFile(string pnFileType)
 
 			break;
 		case 3:
+			// TODO: Solve problem with BKP file
 			fp = pnBkpFile; 
 
-			fileVectorCount = neuronCount;
+			//fileVectorCount = neuronCount;
 			fileVectorCompCount = inputVectorSize;
 
 			break;
@@ -536,142 +584,6 @@ void perceptron::printVectorsFromFile(FILE *fp, int fileVectorCount, int fileVec
 		cout<<"\b\b}\n";
 	
 	}
-}
-
-/* CAUTION!! CRAPPY CODE!
- * TODO: Rewrite fukken everything in learn functions
- */
-/**
- * range -- the total number of vectors to read from the start of the file
- * n -- the velocity of learning
- */
-void perceptron::learn_digits(string idealOutput, int range, float n)
-{
-	                 /*    0         1          2          3          4          5          6          7          8          9    */
-	int ans[10][4] = { {0,0,0,0}, {0,0,0,1}, {0,0,1,0}, {0,0,1,1}, {0,1,0,0}, {0,1,0,1}, {0,1,1,0}, {0,1,1,1}, {1,0,0,0}, {1,0,0,1}};
-
-	FILE *idealOutputFile;
-	/**
-	 * ideal output Vector Count
-	 * The number of vectors in the idealOutput file
-	 */
-	int iVectorCount;
-
-	/**
-	 * ideal Output Component Count
-	 * The number of components (FLOAT) in the idealOutput file
-	 */
-	int iComponentCount;
-
-	/**
-	 * delta = T - OUT
-	 * T -- ideal output
-	 * OUT -- perceptron output
-	 */
-	float delta;
-
-	if( (idealOutputFile = fopen(idealOutput.c_str(), "rb")) == NULL) {
-		/* Log error here -- critical failure */
-
-		cout<<"Error reading ideal learning output vectors!\n";
-		exit(1);
-	}
-
-	iComponentCount = getComponentCount(idealOutputFile, sizeof(float));
-
-	/**
-	 * The number of output components in learning vectors _must_ be 
-	 * equal to the number of output components in the output file vectors
-	 */
-	iVectorCount = iComponentCount/outputVectorSize;
-
-	cout<<"iComponentCount: "<<iComponentCount<<"\n";
-	cout<<"outputVectorSize: "<<outputVectorSize<<"\n";
-
-	cout<<"iVectorCount: "<<iVectorCount<<"\n";
-	cout<<"outputVectorCount: "<<outputVectorCount<<"\n";
-	cout<<"inputVectorCount: "<<inputVectorCount<<"\n";
-
-	if((range > iVectorCount) || (range > outputVectorCount) || (range > inputVectorCount)) {
-		/* Log failure here */
-
-		cout<<"Incorrect range parameter! Function learn_digits(...)";
-		exit(1);
-	}
-
-	if(pnInputFile == NULL) {
-		/* Log failure */
-		cout<<"Cannot access input learning samples\n";
-		exit(1);
-	}
-	
-	float oldWeight;;
-
-	vector<float> idealOut;
-	float realOutComp;
-	float inputVectorComp;
-
-	float weightChange;
-
-	cout<<"\n+_+_+_+_+_+_STARTING LEARNING ALGO:_+_+_+_+_+_+_+\n";
-
-	/* For every output vector... */
-	for(int  i = 0; i < range; i++) {
-		cout<<"Output vector number: "<<i<<"\n";
-
-		cout<<"Reading ideal output file...\n";
-		idealOut = readVectorFromFile(idealOutputFile, i, sizeof(float) * outputVectorSize, false);
-
-		/* go through it's components */
-		for(int j = 0; j < outputVectorSize; j++) {
-			cout<<"Output vector component(NEURON No): "<<j<<"\n";
-			vector<float> newWeights;
-
-			realOutComp = getOutputVectorComponent(i, j);
-			delta = idealOut[j] - realOutComp;
-
-			/* Every component of output vector is one neuron.
-			 * Go through the weights of this j'th neuron */
-			for(int k = 0; k < inputVectorSize; k++) {
-				cout<<"NEURON: "<<j<<": COMP: "<<k<<"\n";
-
-				if(delta == 0) {
-					cout<<"Neuron is stable. \n";
-					break;
-				}
-				/**
-				 * j'th output component -- j'th neuron
-				 */
-
-				/**
-				 * For i'th input vector get it's k'th component
-				 * k -- ordinary number of neuron's current weight
-				 */
-				inputVectorComp = getInputVectorComponent(i, k);
-				cout<<"inputVectorComp: "<<inputVectorComp<<"\n";
-
-				pnLayer.getNeuronWeight(j, k, &oldWeight);
-				weightChange = oldWeight + n * delta * inputVectorComp;
-
-				cout<<"WEIGHT CHANGE: "<<weightChange<<"\n";
-
-				/**
-				 * Accumulate every weight's change -- write it to the vector
-				 */
-				newWeights.push_back(weightChange);
-			}
-
-			/**
-			 * And finally store weights in the neuron
-			 */
-			if(delta != 0) {
-				pnLayer.setNeuronWeights(j, newWeights);
-				cout<<"WRITTEN\n";
-			}
-		}
-	}
-
-	fclose(idealOutputFile);
 }
 
 void perceptron::eraseOutputFile()
