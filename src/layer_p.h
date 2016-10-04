@@ -28,10 +28,17 @@ public:
 	bool readNeuronsFromFile(FILE *fp);
 
 	bool getNeuronWeight(int neuronNumber, int weightNumber, float *result);
+	float getNeuronWeight_NV(int neuronNumber, int weightNumber);
+
 	bool setNeuronWeights(int neuronNumber, vector<float> &newWeights);
+
+	bool deltaNeuronWeights(int neuronNumber, float delta); /*< Change the weights of the neuron by delta */
 
 	void getInput(vector <float> layerInput);
 	vector<float> getOutput();
+
+	int getNeuronCount();
+	int getNeuronWeightCount();
 	
 };
 

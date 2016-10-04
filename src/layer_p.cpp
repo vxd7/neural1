@@ -1,7 +1,7 @@
 #include "layer_p.h"
 
 layer::layer()
-{
+{ 
 	
 }
 
@@ -11,7 +11,7 @@ layer::~layer()
 }
 
 void layer::initLayer(int neuronCount, int inputSize)
-{
+{ 
 	/* Log here */
 	numberOfNeurons = neuronCount;
 	inputVectorSize = inputSize;
@@ -125,6 +125,14 @@ bool layer::getNeuronWeight(int neuronNumber, int weightNumber, float *result)
 		return false;
 
 }
+float layer::getNeuronWeight_NV(int neuronNumber, int weightNumber)
+{
+	if(neuronNumber > numberOfNeurons) {
+		cout << "Incorrect neuron number! Function getNeuronWeight_NV" << endl;
+	}
+
+	return neurons[neuronNumber].getWeight_NV(weightNumber);
+}
 
 bool layer::setNeuronWeights(int neuronNumber, vector<float> &newWeights)
 {
@@ -158,4 +166,27 @@ void layer::getInput(vector <float> layerInput)
 vector<float> layer::getOutput()
 {
 	return output;
+}
+
+int layer::getNeuronCount()
+{
+	return numberOfNeurons;
+	
+}
+int layer::getNeuronWeightCount()
+{
+	return neurons[0].getWeightsCount();
+}
+
+bool layer::deltaNeuronWeights(int neuronNumber, float delta)
+{
+	for(int i = 0; i < neurons[neuronNumber].getWeightsCount(); i++) {
+		float oldWeight = 0;
+		neurons[neuronNumber].getWeight(i, &oldWeight);
+
+		float newWeight = oldWeight + delta;
+		neurons[neuronNumber].changeSingleWeight(i, newWeight);
+	}
+
+	return true;
 }

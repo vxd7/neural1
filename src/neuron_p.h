@@ -44,6 +44,7 @@ public:
 	void randomizeWeights(); /**< Function for weights' randomization */
 
 	float tfunc(float sighal); /**< Threshold finction */
+	float tfuncSigmoid(float signal); /**< Sigmod (logistic) threshold function */
 	void summate(vector<float> &input); /**< Summation function. Takes input vector as argument */
 
 	bool writeWeights(FILE *fp); /**< Write weights to the file */
@@ -52,7 +53,13 @@ public:
 	/* Learning: */
 
 	bool getWeight(int num, float *result);
-	bool changeWeights(vector<float> &newWeights);
+	float getWeight_NV(int num);
+	bool changeWeights(vector<float> &newWeights); //TODO: changeWeights -> overwriteWeights
+
+	bool changeSingleWeight(int weightNumber, float newWeight); /**< Change only one weight of the current neuron */
+
+	int getWeightsCount();
+
 
 	//void setNeuronLogFile(std::string);
 };

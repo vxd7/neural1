@@ -66,6 +66,14 @@ float neuron::tfunc(float signal)
 	else return 0.0;
 }
 
+float neuron::tfuncSigmoid(float signal)
+{
+	float a = 0.9;
+	float res = 1.0/(1.0 + exp(-1.0 * a * signal));
+
+	return res;
+}
+
 void neuron::summate(vector<float> &input)
 {
     float signal = 0.0;
@@ -91,14 +99,14 @@ void neuron::summate(vector<float> &input)
 
         signal += weights[i] * input[i];
 
-		cout<<"NEURON: +signal is: "<<signal<<"\n\n";
+		cout<<"NEURON: +signal is: "<<signal<<"\n";
     }
 
 	cout<<"NEURON: resulting signal is: "<<signal<<"\n";
 	cout<<"NEURON: executing threshold function...\n";
 
 	/* And execute threshold function */
-	signal = tfunc(signal);
+	signal = tfuncSigmoid(signal);
 	cout<<"NEURON: output is "<<signal<<"\n";
 
 	/* Store the result in the neuron */
@@ -161,6 +169,7 @@ bool neuron::readWeights(FILE *fp, int num)
 }
 
 
+// TODO: Add normal try...catch, return weight
 bool neuron::getWeight(int num, float *result)
 {
 	if(num > inputsCount) {
@@ -174,6 +183,19 @@ bool neuron::getWeight(int num, float *result)
 	*(result) = weights[num];
 }
 
+float neuron::getWeight_NV(int num)
+{
+	if(num > inputsCount) {
+		/* Log error */
+
+		cout<<"Error searching for neuron weight: no such weight: "<<num<<"\n";
+
+	}
+
+	return weights[num];
+	
+}
+
 bool neuron::changeWeights(vector<float> &newWeights)
 {
 	if(newWeights.size() > inputsCount) {
@@ -184,8 +206,25 @@ bool neuron::changeWeights(vector<float> &newWeights)
 	}
 
 	for(int i = 0; i < inputsCount; i++) {
-		weights[i] = newWeights[i];
+		weights[i] = weights[i] + newWeights[i];
 	}
 
 	return true;
+}
+
+bool neuron::changeSingleWeight(int weightNumber, float newWeight)
+{
+	if(weightNumber > inputsCount) {
+		cout << "ERROR, Invalid weight number, function changeSingleWeight" << endl;
+		return false;
+	}
+
+	weights[weightNumber] = newWeight;
+
+	return true;
+}
+
+int neuron::getWeightsCount()
+{
+	return inputsCount;
 }
