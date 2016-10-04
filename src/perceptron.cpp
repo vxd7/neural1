@@ -290,8 +290,14 @@ void perceptron::processData(bool write /* = true */)
 	 * Read written vector -- it starts with the (outputVectorCount - 1)'th vector
 	 * true because we want to output to STDOUT
 	 */
-	cout<<"\n-----Resulting output vector:-----\n";
-	readVectorFromFile(pnOutputFile, outputVectorCount - 1, sizeof(float) * outputVectorSize, true);
+	cout<<"\n-----Resulting output vector:-----" << endl;
+	cout << "{";
+	for(int i = 0; i < pnOutput.size(); i++) {
+		cout << pnOutput[i] << ", ";
+	}
+	cout << "\b\b"; //cursor two positions backwards
+	cout << "}" << endl;
+	//readVectorFromFile(pnOutputFile, outputVectorCount - 1, sizeof(float) * outputVectorSize, true);
 
 
 }
@@ -589,4 +595,99 @@ void perceptron::printVectorsFromFile(FILE *fp, int fileVectorCount, int fileVec
 void perceptron::eraseOutputFile()
 {
 	pnOutputFile = freopen(NULL, "wb+", pnOutputFile);
+}
+
+void perceptron::backpropLearn(vector <float> desiredOutput, float learningSpeed, int iterCount)
+{
+	/**
+	 * ===== First we run backprop algo for the neurons of the output layer =====
+	 */
+
+	/**
+	 * IMPORTANT: Last layer is the layer with the number of (layerCount - 1)
+	 */
+
+	int outLayerNeuronCount = networkLayers[layerCount - 1].getNeuronCount();
+	int outLayerNeuronWeights = networkLayers[layerCount - 1].getNeuronWeightCount();
+	float a = 0.9;
+
+	vector <float> lGrads_outLayer;
+	lGrads_outLayer.resize(outLayerNeuronCount);
+
+	for(int i = 0; i < outLayerNeuronCount; i++) {
+		lGrads_outLayer[i] = lGradOutNeuron(i, desiredOutput[i], a);
+	}
+
+	/**
+	 * And change the weights of the output layer neurons
+	 */
+
+	float newOutNeuronDelta;
+
+	for(int i = 0; i < outLayerNeuronCount; i++) {
+		newOutNeuronDelta = learningSpeed * lGrads_outLayer[i] * networkLayers[layerCount - 1].output[i];
+
+		networkLayers[layerCount - 1].deltaNeuronWeights(i, newOutNeuronDelta);
+
+	}
+
+
+	/**
+	 * ===== Run backprop for hidden layers =====
+	 */
+	vector <float> oldLocalGrads;
+	vector <float> newLocalGrads;
+
+	oldLocalGrads = lGrads_outLayer;
+
+	/**
+	 * For each layer
+	 */
+	for(int i = 1; i < layerCount; i++) {
+		int hLayerNeuronCount = networkLayers[i].getNeuronCount();
+		int hLayerNeuronWeights = networkLayers[i].getNeuronWeightCount();
+
+		newLocalGrads.clear();
+		newLocalGrads.resize(hLayerNeuronCount);
+
+		/**
+		 * For each neuron in the layer we firstly compute its local gradient
+		 */
+		for(int j = 0; j < hLayerNeuronCount; j++) {
+			newLocalGrads[j] = lGradHiddenNeuron(j, i, oldLocalGrads, a);
+		}
+
+		oldLocalGrads = newLocalGrads;
+
+		/**
+		 * And change the weights of the neurons in current hidden layer
+		 */
+		for(int j = 0; j < hLayerNeuronCount; j++) {
+			float deltaHiddenNeuron = learningSpeed * newLocalGrads[j] * networkLayers[i].output[j];
+
+			networkLayers[i].deltaNeuronWeights(j, deltaHiddenNeuron);
+		}
+	}
+
+}
+
+float perceptron::lGradOutNeuron(int neuronIndex, float desiredNeuronOut, float a)
+{
+	float neuronOut = networkLayers[layerCount - 1].output[neuronIndex];
+	return a * (desiredNeuronOut - neuronOut) * neuronOut * (1.0 - neuronOut);
+	
+}
+
+float perceptron::lGradHiddenNeuron(int neuronIndex, int currentLayerIndex, vector <float> nextLayerLocalGrads, float a)
+{
+	float nextLayerSum = 0.0;
+
+	for(int i = 0; i < networkLayers[currentLayerIndex + 1].getNeuronCount(); i++) {
+		nextLayerSum += nextLayerLocalGrads[i] * networkLayers[currentLayerIndex + 1].getNeuronWeight_NV(i, neuronIndex);
+	}
+
+	float neuronOut = networkLayers[currentLayerIndex].output[neuronIndex];
+
+	return a * neuronOut * (1.0 - neuronOut) * nextLayerSum;
+
 }

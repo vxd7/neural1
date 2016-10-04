@@ -142,5 +142,8 @@ public:
 	void printVectorsFromFile(string pnFileType);
 	
 	void eraseOutputFile();
-};
 
+	void backpropLearn(vector <float> desiredOutput, float learningSpeed, int iterCount);
+	float lGradOutNeuron(int neuronIndex, float desiredNeuronOut, float a); /**< Local gradient of the neuron in the output layer */
+	float lGradHiddenNeuron(int neuronIndex, int currentLayerIndex, vector <float> nextLayerLocalGrads, float a); /**< Local gradient of the neuron in the hidden layer */
+};
